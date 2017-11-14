@@ -1,14 +1,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <bsd/bsd.h>
 #include <openssl/md4.h>
 
-void main(void)
+int main(void)
 {
   //int status = 0;
   //MD4_CTX *c;
-  unsigned char *data;
-  unsigned char *digest;
+  char *data = malloc(64);
+  unsigned char *digest = malloc(1024);
 
   printf("This is a test.\n");
 
@@ -17,20 +18,27 @@ void main(void)
   //  goto out;
   //}
 
-  if((data = malloc(64)) == NULL) {
-    printf("Malloc failed.\n");
+  if (data == 0 || digest == 0) {
+    printf("Not initialised.\n");
     goto out;
   }
 
-  data = "I am a little teapot.";
+  //*data = *digest = "";
 
-  printf("data is %d bytes long\n", sizeof(data));
+  strlcpy(data, "This is a test.", 16);
 
-  MD4(data, sizeof(data), digest);
+  //*data = "This is a test.";
 
-  printf("data='%s' digest='%s'", data, digest);
+  printf("data is %lu bytes long\n", strlen(data));
+  printf("data='%s' digest='%s'\n", data, digest);
+
+  MD4((unsigned char *)data, sizeof(data), digest);
+
+  printf("data='%s' digest='%s'\n", data, digest);
 
 out:
   free(digest);
   free(data);
+
+  return 0;
 }
