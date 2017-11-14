@@ -9,6 +9,11 @@
 <script>
   var files = new Array();
 
+  var fileOffset = 0;
+  var readArray = new Array();
+  var readOffset = 0;
+  var f = null;
+
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
     
@@ -37,64 +42,101 @@
     document.getElementById('reset').disabled = true;
   }
   
-  function processFiles(evt) {
-    for (var i = 0, f; f = files[i]; i++) {
+  function startProcessingFiles(evt) {
+    f = files[fileOffset++];
+    console.log('process_files: starting', f.name);
+
+    setTimeout(processFiles, 100);
+    whatsHappening();
+  }
+
+  function processFiles() {
+    console.log('process_files: loop');
+    //for (var i = 0, f; f = files[i]; i++) {
+    while (readArray.length < 5 && !(readOffset > f.size)) {
       var file = new FileReader();
       
-      // use f.split to cut ranges before read?
-      
-      file.readAsArrayBuffer(f);
-      file.addEventListener('loadend', printFileDetails, false);
+      console.log('process_files: name=',f.name,'size=',f.size,'offset=',readOffset);
+
+      file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
+      readOffset = readOffset + 9728000;
+
+      file.addEventListener('loadend', newBlock, false);
     }
-  }
-  
-  function printFileDetails(evt) {
-    var chunks = evt.total / 9728000;
-    var workers = givePowerOfTwo(navigator.hardwareConcurrency || 2);
-    var blocksize = Math.floor(Math.floor(chunks) / workers) * 9728000;
-    var single = false;
-    //var firsttwo = evt.target.result.slice(0,1);
-    //var nexttwo = evt.target.result.slice(1,2);
-    //console.log('name=',escape(f.name),'size=',f.size,'result=',file.result);
-    //console.log(evt);
-    //var firstview = new Uint8Array(firsttwo);
-    if (chunks > 1) {
-      // multiwork begin
-      if (workers > chunks) {
-        workers = Math.floor(chunks);
-        blocksize = Math.floor(Math.floor(chunks) / workers) * 9728000;
+
+    if (readOffset > f.size) {
+      if (readArray.length <= 0) {
+        console.log('process_files: finished', f.name);
+        //f = files[fileOffset++];
+        console.log('process_files: starting', f.name);
+        if (!f) {
+          console.log('process_files: all files processed.');
+          return;
+        }
       }
-    } else {
-      // single md4 begin
-      workers = 1;
-      blocksize = evt.total;
-      single = true;
     }
-    
-    if (!single && ((blocksize % 9728000) != 0)) {
-      // run away, something went wrong with division of work
-      console.log('something went very wrong. you should never see this.');
-      console.log('total=',evt.total,'chunks=',chunks,'workers=',workers,'blocksize=',blocksize);
-      return;
-    }
-    
-    console.log('total=',evt.total,'chunks=',chunks,'workers=',workers,'blocksize=',blocksize,'remainder=',(evt.total-blocksize*workers));
+
+    setTimeout(processFiles, 1000);
+    //}
   }
-  
-  //
-  // givePowerOfTwo(x): When x is a power of two return x, otherwise return next
-  // lowest power of two. For example 4 returns 4 and 12 returns 8.
-  //
-  function givePowerOfTwo(x) {
-    if (!(x <= 1) && !((x != 0) && ((x & (x - 1)) == 0)))
-      return givePowerOfTwo(x - 1);
-    else if (x <= 1)
-      return 1;
-    else
-      return x;
+
+  function newBlock(evt) {
+    readArray.push(evt.target.result);
   }
+
+  function whatsHappening() {
+    console.log('queue_length=',readArray.length,'array=',readArray);
+    setTimeout(whatsHappening, 10000);
+  }
+
+//   function printFileDetails(evt) {
+//     var chunks = evt.total / 9728000;
+//     var workers = givePowerOfTwo(navigator.hardwareConcurrency || 2);
+//     var blocksize = Math.floor(Math.floor(chunks) / workers) * 9728000;
+//     var single = false;
+//     //var firsttwo = evt.target.result.slice(0,1);
+//     //var nexttwo = evt.target.result.slice(1,2);
+//     //console.log('name=',escape(f.name),'size=',f.size,'result=',file.result);
+//     //console.log(evt);
+//     //var firstview = new Uint8Array(firsttwo);
+//     if (chunks > 1) {
+//       // multiwork begin
+//       if (workers > chunks) {
+//         workers = Math.floor(chunks);
+//         blocksize = Math.floor(Math.floor(chunks) / workers) * 9728000;
+//       }
+//     } else {
+//       // single md4 begin
+//       workers = 1;
+//       blocksize = evt.total;
+//       single = true;
+//     }
+//
+//     if (!single && ((blocksize % 9728000) != 0)) {
+//       // run away, something went wrong with division of work
+//       console.log('something went very wrong. you should never see this.');
+//       console.log('total=',evt.total,'chunks=',chunks,'workers=',workers,'blocksize=',blocksize);
+//       return;
+//     }
+//
+// console.log('total=',evt.total,'chunks=',chunks,'workers=',workers,'blocksize=',blocksize,'remainder=',(evt.total-blocksize*workers));
+//     console.log(evt);
+//   }
+
+//   //
+//   // givePowerOfTwo(x): When x is a power of two return x, otherwise return next
+//   // lowest power of two. For example 4 returns 4 and 12 returns 8.
+//   //
+//   function givePowerOfTwo(x) {
+//     if (!(x <= 1) && !((x != 0) && ((x & (x - 1)) == 0)))
+//       return givePowerOfTwo(x - 1);
+//     else if (x <= 1)
+//       return 1;
+//     else
+//       return x;
+//   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
   document.getElementById('reset').addEventListener('click', resetEverything, false);
-  document.getElementById('process').addEventListener('click', processFiles, false);
+  document.getElementById('process').addEventListener('click', startProcessingFiles, false);
 </script>
