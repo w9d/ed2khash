@@ -99,7 +99,7 @@
       return;
 
     console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
-    if (chunkQueue == readArray.length) {
+    if (chunkQueue > 0 && chunkQueue == readArray.length) {
       readArray.shift();
       chunkQueue -= 1;
       //console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
