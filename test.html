@@ -12,6 +12,8 @@
   var fileOffset = 0;
   var readArray = new Array();
   var readOffset = 0;
+  let readOffset_i = 0;
+  var chunkQueue = 0;
   var f = null;
 
   function handleFileSelect(evt) {
@@ -46,47 +48,64 @@
     f = files[fileOffset++];
     console.log('process_files: starting', f.name);
 
-    setTimeout(processFiles, 100);
+    processFiles();
     whatsHappening();
   }
 
   function processFiles() {
-    console.log('process_files: loop');
     //for (var i = 0, f; f = files[i]; i++) {
-    while (readArray.length < 5 && !(readOffset > f.size)) {
+    while (chunkQueue < 5 && !(readOffset > f.size)) {
       var file = new FileReader();
-      
-      console.log('process_files: name=',f.name,'size=',f.size,'offset=',readOffset);
+
+      //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
       file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
+
+      file.addEventListener('loadend',
+        function(evt) {
+          readArray.splice(readOffset_i, 0, evt.target.result);
+        }, false
+      );
+
       readOffset = readOffset + 9728000;
-
-      file.addEventListener('loadend', newBlock, false);
+      readOffset_i += 1;
+      chunkQueue += 1;
     }
 
-    if (readOffset > f.size) {
-      if (readArray.length <= 0) {
-        console.log('process_files: finished', f.name);
-        //f = files[fileOffset++];
+    if (readOffset > f.size && chunkQueue <= 0 && readArray.length <= 0) {
+      console.log('process_files: finished', f.name);
+      f = files[fileOffset++];
+      readOffset = 0;
+      readOffset_i = 0;
+
+      if (f) {
         console.log('process_files: starting', f.name);
-        if (!f) {
-          console.log('process_files: all files processed.');
-          return;
-        }
+      } else {
+        console.log('process_files: all files processed.');
+        return;
       }
+    } else {
+      //console.log('process_files: still processing', f.name);
     }
 
-    setTimeout(processFiles, 1000);
+    setTimeout(processFiles, 250);
     //}
   }
 
-  function newBlock(evt) {
-    readArray.push(evt.target.result);
-  }
-
   function whatsHappening() {
-    console.log('queue_length=',readArray.length,'array=',readArray);
-    setTimeout(whatsHappening, 10000);
+    if (!f)
+      return;
+
+    console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
+    if (chunkQueue == readArray.length) {
+      readArray.shift();
+      chunkQueue -= 1;
+      //console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
+    } else {
+      console.log('not safe to modify data structure');
+    }
+
+    setTimeout(whatsHappening, 125);
   }
 
 //   function printFileDetails(evt) {
