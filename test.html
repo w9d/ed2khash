@@ -10,11 +10,12 @@
   var files = new Array();
 
   var fileOffset = 0;
-  var readArray = new Array();
+  var readArray = [];
   var readOffset = 0;
   var readOffset_i = 0;
   var chunkQueue = 0;
   var f = null;
+  var fakeread_i = 0;
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -64,7 +65,7 @@
       let tmp_readOffset_i = readOffset_i;
       file.addEventListener('loadend',
         function(evt) {
-          readArray.splice(tmp_readOffset_i, 0, evt.target.result);
+          readArray[tmp_readOffset_i] = evt.target.result;
         }, false
       );
 
@@ -73,7 +74,7 @@
       chunkQueue += 1;
     }
 
-    if (readOffset > f.size && chunkQueue <= 0 && readArray.length <= 0) {
+    if (readOffset > f.size && chunkQueue <= 0 && readArray[readArray.length - 1] == null) {
       console.log('process_files: finished', f.name);
       f = files[fileOffset++];
       readOffset = 0;
@@ -99,13 +100,15 @@
       return;
 
     console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
-    if (chunkQueue > 0 && chunkQueue == readArray.length) {
-      readArray.shift();
-      chunkQueue -= 1;
-      //console.log('actual_queue_length=', chunkQueue, 'available_queue_length=', readArray.length, 'array=', readArray);
-    } else {
+
+    if (chunkQueue <= 0 || readArray[fakeread_i] == null) {
       console.log('not safe to modify data structure');
+      setTimeout(whatsHappening, 125);
+      return;
     }
+
+    delete readArray[fakeread_i++];
+    chunkQueue -= 1;
 
     setTimeout(whatsHappening, 125);
   }
