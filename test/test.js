@@ -1,5 +1,14 @@
 'use strict';
 
+function generateZeroData(start, end, size) {
+  if (end > size)
+    end = size;
+
+  let buffer = new Uint8Array(end - start);
+
+  return buffer.buffer;
+}
+
 function generateIncData(start, end, size) {
   if (end > size)
     end = size;
@@ -51,13 +60,13 @@ FileReader.prototype.addEventListener = function(event, fn, useCapture) {
   this.callback['event_' + event].push(fn);
 }
 
-let file = new File(generateIncData, 25000000);
+let file = new File(generateZeroData, 9728000);
 let mockfilelist = [];
 mockfilelist.push(file);
 
 
 let reader = new FileReader();
-for (let i = 0; i < 25000000; i += 9728000) {
+for (let i = 0; i < file.size; i += 9728000) {
   console.log('read',i,'to',i+9728000);
   reader.readAsArrayBuffer(file.slice(i, i + 9728000));
   console.log('finished read');
