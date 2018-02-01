@@ -1,7 +1,8 @@
 'use strict';
 
 //import md4 from "../external/js-md4/src/md4";
-const md4 = require("../external/js-md4/src/md4");
+//const md4 = require("../external/js-md4/src/md4");
+const md4 = require("../external/js-md4/build/md4.min");
 
 function generateZeroData(start, end, size) {
   if (end > size)
