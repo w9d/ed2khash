@@ -36,19 +36,29 @@
     document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
     document.getElementById('reset').disabled = false;
     document.getElementById('process').disabled = false;
+    document.getElementById('files').disabled = true;
   }
   
   function resetEverything(evt) {
     files = new Array();
+    fileOffset = 0;
     document.getElementById('list').innerHTML = '';
     document.getElementById('files').value = '';
     document.getElementById('reset').disabled = true;
+    document.getElementById('process').disabled = true;
+    document.getElementById('files').disabled = false;
   }
   
   function startProcessingFiles(evt) {
     f = files[fileOffset++];
-    console.log('process_files: starting', f.name);
 
+    if (!f) {
+      console.log('process_files: no file to process, this should never happen');
+      return;
+    }
+
+    document.getElementById('process').disabled = true;
+    console.log('process_files: starting', f.name);
     processFiles();
     whatsHappening();
   }
@@ -79,6 +89,7 @@
       f = files[fileOffset++];
       readOffset = 0;
       readOffset_i = 0;
+      fakeread_i = 0;
       chunkQueue = 0;
 
       if (f) {
