@@ -32,7 +32,7 @@ var File = function(fn, size) {
   this.size = size;
 }
 File.prototype.slice = function(s, e) {
-  return { 'arraybuffer': file.generatorfn(s, e, this.size) }
+  return { 'arraybuffer': this.generatorfn(s, e, this.size) }
 }
 
 var FileReader = function() {
