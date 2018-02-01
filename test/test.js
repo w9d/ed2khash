@@ -64,9 +64,13 @@ FileReader.prototype.addEventListener = function(event, fn, useCapture) {
   this.callback['event_' + event].push(fn);
 }
 
-let file = new File(generateZeroData, 190456000);
+let file = new File(generateZeroData, 19456000);
+// 9728000 19456000
 let mockfilelist = [];
 mockfilelist.push(file);
+
+var md4_context = md4.create();
+var md4_context_inner = md4.create();
 
 var timings = [];
 var total = 0, min = 60000, max = 0;
@@ -79,14 +83,23 @@ for (let i = 0; i < file.size; i += 9728000) {
 }
 reader.addEventListener('loadend',
   function(evt) {
-    //console.log('callback', evt.target.result.byteLength)
+    //console.log('callback', evt.target.result.byteLength);
     //var test = new Uint8Array(evt.target.result);
 
     var before = Date.now();
-    md4.hex(evt.target.result);
+    md4_context_inner.update(evt.target.result);
+    md4_context.update(md4_context_inner.arrayBuffer());
+
+    // at the moment, this won't show complete hash
+
+    //console.log('chunk hash is ' + md4.hex(evt.target.result));
+    if (timings.length == 1)
+      console.log('hash is       ' + md4_context.hex());
     var after = Date.now();
     var diff = after - before;
     timings.push(diff);
+
+    md4_context_inner = md4.create();
 
     if (diff < min)
         min = diff;
