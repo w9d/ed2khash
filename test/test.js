@@ -95,7 +95,7 @@ reader.addEventListener('loadend',
     total += diff;
 
     //console.log("MD4 calculation time...");
-    console.log('md4 min/avg/max = ' + min + '/' + Math.floor((total/timings.length)+0.5) + '/' + max);
+    console.log('md4 min/avg/max actual = ' + min + '/' + Math.floor((total/timings.length)+0.5) + '/' + max + ' ' + diff);
 
   }, false
 );
