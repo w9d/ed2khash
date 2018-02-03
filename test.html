@@ -20,7 +20,7 @@
 
   // TODO: test, do this better.
   var file_md4 = new Array();
-  var ed2k_nullend = true;
+  var ed2k_nullend = false;
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -163,8 +163,10 @@
     console.log('"reading" ' + fakeread_i);
 
     // TODO: Replace direct call to md4 library to web worker dispatcher
-    if (readArray[fakeread_i].byteLength != 0 || ed2k_nullend)
+    if (readArray[fakeread_i].byteLength > 0 || ed2k_nullend)
       file_md4[fakeread_i] = md4.arrayBuffer(readArray[fakeread_i]);
+    else
+      console.log('  this block is nullend, ignoring.');
 
     delete readArray[fakeread_i++];
     chunkQueue -= 1;
