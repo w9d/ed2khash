@@ -8,19 +8,144 @@
 
 <script src="external/js-md4/build/md4.min.js"></script>
 <script>
+  var ed2k_files = ed2k_files || (function(files, _ed2k_nullend) {
+    "use strict";
+
+    var fileOffset = 0;
+    var readArray = [];
+    var readOffset = 0;
+    var readOffset_i = 0;
+    var chunkQueue = 0;
+    var fakeread_i = [];
+
+    var file_md4 = new Array();
+    var ed2k_nullend = _ed2k_nullend || false;
+
+    var f = files[fileOffset++];
+    if (!f)
+      return;
+
+    console.log('ed2k_files: nullend mode is ' +
+      (ed2k_nullend && 'enabled' || 'disabled'));
+    console.log('process_files: starting', f.name);
+    processFiles();
+    whatsHappening();
+
+    function processFiles() {
+      while (chunkQueue < 6 && !(readOffset > f.size)) {
+        var file = new FileReader();
+
+        //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
+
+        file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
+
+        let tmp_readOffset_i = readOffset_i;
+        file.addEventListener('loadend',
+          function(evt) {
+            readArray[tmp_readOffset_i] = evt.target.result;
+            fakeread_i.push(tmp_readOffset_i);
+          }, false
+        );
+
+        readOffset = readOffset + 9728000;
+        readOffset_i += 1;
+        chunkQueue += 1;
+      }
+
+      if (readOffset > f.size && chunkQueue <= 0 && readArray[readArray.length - 1] == null) {
+        // calculate final hash...
+        var ed2k_hash = md4.create();
+        if ((ed2k_nullend && f.size >= 9728000) ||
+          (!ed2k_nullend && f.size > 9728000)) {
+          // file is more than one chunk, no special bullshit necessary
+          for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
+            ed2k_hash.update(file_md4[i]);
+          }
+          ed2k_hash = ed2k_hash.hex();
+        } else {
+          // file is less than 9728000 in nullend mode OR
+          // file is less than 9728001 in non-nullend mode
+          ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
+        }
+        console.log('process_files: ed2k_hash=', ed2k_hash);
+        console.log('process_files: finished', f.name);
+        f = files[fileOffset++];
+        readOffset = 0;
+        readOffset_i = 0;
+        fakeread_i = [];
+        chunkQueue = 0;
+        file_md4 = new Array();
+
+        if (f) {
+          console.log('process_files: starting', f.name);
+        } else {
+          console.log('process_files: all files processed.');
+          return;
+        }
+      } else {
+        //console.log('process_files: still processing', f.name);
+      }
+
+      setTimeout(processFiles, 250);
+    }
+
+    function whatsHappening() {
+      var tmp_availablechunks = fakeread_i.length;
+      var tmp_fakeread_i = fakeread_i.shift();
+
+      if (!f)
+        return;
+
+      //console.log('chunk availability ' + tmp_availablechunks + '/' + chunkQueue);
+
+      if (chunkQueue <= 0 || readArray[tmp_fakeread_i] == null) {
+        console.log('  waiting for chunks to be available..');
+        setTimeout(whatsHappening, 250);
+        return;
+      }
+
+      //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
+      console.log('"reading" ' + tmp_fakeread_i);
+
+      // TODO: Replace direct call to md4 library to web worker dispatcher
+      if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend)
+        file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+      else
+        console.log('  this block is nullend, ignoring.');
+
+      delete readArray[tmp_fakeread_i];
+      chunkQueue -= 1;
+
+      setTimeout(whatsHappening, 1);
+    }
+
+    function arrayBufferToHexDigest(arr) {
+      // taken from js-md4
+      var HEX_CHARS = '0123456789abcdef'.split('');
+      var blocks = new Uint32Array(arr);
+      var h0 = blocks[0], h1 = blocks[1], h2 = blocks[2], h3 = blocks[3];
+
+      return HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
+      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
+      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
+      HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
+      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
+      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
+      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
+      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
+      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
+      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
+      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
+      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
+      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
+      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
+      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
+      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
+    }
+  });
+</script>
+<script>
   var files = new Array();
-
-  var fileOffset = 0;
-  var readArray = [];
-  var readOffset = 0;
-  var readOffset_i = 0;
-  var chunkQueue = 0;
-  var f = null;
-  var fakeread_i = 0;
-
-  // TODO: test, do this better.
-  var file_md4 = new Array();
-  var ed2k_nullend = false;
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -43,10 +168,9 @@
     document.getElementById('process').disabled = false;
     document.getElementById('files').disabled = true;
   }
-  
+
   function resetEverything(evt) {
     files = new Array();
-    fileOffset = 0;
     document.getElementById('list').innerHTML = '';
     document.getElementById('files').value = '';
     document.getElementById('reset').disabled = true;
@@ -55,126 +179,17 @@
   }
 
   function startProcessingFiles(evt) {
-    f = files[fileOffset++];
-
-    if (!f) {
+    if (!(files[0])) {
       console.log('process_files: no file to process, this should never happen');
       return;
     }
 
     document.getElementById('process').disabled = true;
-    console.log('process_files: starting', f.name);
-    processFiles();
-    whatsHappening();
+
+    var ed2ker = new ed2k_files(files);
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
   document.getElementById('reset').addEventListener('click', resetEverything, false);
   document.getElementById('process').addEventListener('click', startProcessingFiles, false);
-
-  // taken from js-md4
-  var HEX_CHARS = '0123456789abcdef'.split('');
-  function arrayBufferToHexDigest(arr) {
-    var blocks = new Uint32Array(arr);
-    var h0 = blocks[0], h1 = blocks[1], h2 = blocks[2], h3 = blocks[3];
-
-    return HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
-      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
-      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
-      HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
-      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
-      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
-      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
-      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
-      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
-      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
-      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
-      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
-      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
-      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
-      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
-      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
-  }
-
-  function processFiles() {
-    while (chunkQueue < 5 && !(readOffset > f.size)) {
-      var file = new FileReader();
-
-      //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
-
-      file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
-
-      let tmp_readOffset_i = readOffset_i;
-      file.addEventListener('loadend',
-        function(evt) {
-          readArray[tmp_readOffset_i] = evt.target.result;
-        }, false
-      );
-
-      readOffset = readOffset + 9728000;
-      readOffset_i += 1;
-      chunkQueue += 1;
-    }
-
-    if (readOffset > f.size && chunkQueue <= 0 && readArray[readArray.length - 1] == null) {
-      // calculate final hash...
-      var ed2k_hash = md4.create();
-      if ((ed2k_nullend && f.size >= 9728000) ||
-          (!ed2k_nullend && f.size > 9728000)) {
-        // file is more than one chunk, no special bullshit necessary
-        for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
-          ed2k_hash.update(file_md4[i]);
-        }
-        ed2k_hash = ed2k_hash.hex();
-      } else {
-        // file is less than 9728000 in nullend mode OR
-        // file is less than 9728001 in non-nullend mode
-        ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
-      }
-      console.log('process_files: ed2k_hash=', ed2k_hash);
-      console.log('process_files: finished', f.name);
-      f = files[fileOffset++];
-      readOffset = 0;
-      readOffset_i = 0;
-      fakeread_i = 0;
-      chunkQueue = 0;
-      file_md4 = new Array();
-
-      if (f) {
-        console.log('process_files: starting', f.name);
-      } else {
-        console.log('process_files: all files processed.');
-        return;
-      }
-    } else {
-      //console.log('process_files: still processing', f.name);
-    }
-
-    setTimeout(processFiles, 250);
-  }
-
-  function whatsHappening() {
-    if (!f)
-      return;
-
-    if (chunkQueue <= 0 || readArray[fakeread_i] == null) {
-      //console.log('not safe to modify data structure');
-      setTimeout(whatsHappening, 550);
-      return;
-    }
-
-    //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
-    console.log('"reading" ' + fakeread_i);
-
-    // TODO: Replace direct call to md4 library to web worker dispatcher
-    if (readArray[fakeread_i].byteLength > 0 || ed2k_nullend)
-      file_md4[fakeread_i] = md4.arrayBuffer(readArray[fakeread_i]);
-    else
-      console.log('  this block is nullend, ignoring.');
-
-    delete readArray[fakeread_i++];
-    chunkQueue -= 1;
-
-    setTimeout(whatsHappening, 1);
-  }
 </script>
