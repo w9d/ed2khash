@@ -53,7 +53,25 @@
     document.getElementById('process').disabled = true;
     document.getElementById('files').disabled = false;
   }
-  
+
+  function startProcessingFiles(evt) {
+    f = files[fileOffset++];
+
+    if (!f) {
+      console.log('process_files: no file to process, this should never happen');
+      return;
+    }
+
+    document.getElementById('process').disabled = true;
+    console.log('process_files: starting', f.name);
+    processFiles();
+    whatsHappening();
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+  document.getElementById('reset').addEventListener('click', resetEverything, false);
+  document.getElementById('process').addEventListener('click', startProcessingFiles, false);
+
   // taken from js-md4
   var HEX_CHARS = '0123456789abcdef'.split('');
   function arrayBufferToHexDigest(arr) {
@@ -76,20 +94,6 @@
       HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
       HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
       HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
-  }
-
-  function startProcessingFiles(evt) {
-    f = files[fileOffset++];
-
-    if (!f) {
-      console.log('process_files: no file to process, this should never happen');
-      return;
-    }
-
-    document.getElementById('process').disabled = true;
-    console.log('process_files: starting', f.name);
-    processFiles();
-    whatsHappening();
   }
 
   function processFiles() {
@@ -173,8 +177,4 @@
 
     setTimeout(whatsHappening, 1);
   }
-
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
-  document.getElementById('reset').addEventListener('click', resetEverything, false);
-  document.getElementById('process').addEventListener('click', startProcessingFiles, false);
 </script>
