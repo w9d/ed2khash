@@ -118,7 +118,8 @@
     }
 
     function workManager() {
-      const max_workers = 2;
+      const compute_capacity = (navigator.hardwareConcurrency || 2) + 1;
+      const max_workers = (compute_capacity <= 6) && compute_capacity || 6;
       var worker = [];
       var available_workers = [];
 
