@@ -16,6 +16,8 @@
     var readOffset_i = 0;
     var chunkQueue = 0;
     var fakeread_i = [];
+    var workers = 0;
+    const max_workers = 1;
 
     var file_md4 = new Array();
     var comp_chunks = 0;
@@ -47,7 +49,8 @@
         chunkQueue += 1;
       }
 
-      if (readOffset > f.size && chunkQueue <= 0 && readArray[readArray.length - 1] == null) {
+      if (readOffset > f.size && chunkQueue <= 0 && workers <= 0 &&
+        readArray[readArray.length - 1] == null) {
         // calculate final hash...
         var ed2k_hash = md4.create();
         if ((ed2k_nullend && f.size >= 9728000) ||
@@ -74,12 +77,18 @@
 
     function whatsHappening() {
       var tmp_availablechunks = fakeread_i.length;
-      var tmp_fakeread_i = fakeread_i.shift();
+      var tmp_fakeread_i = fakeread_i[0];
 
       if (!f)
         return;
 
       //console.log('chunk availability ' + tmp_availablechunks + '/' + chunkQueue);
+
+      if (workers >= max_workers) {
+        console.log('  waiting for workers to finish...');
+        setTimeout(whatsHappening, 500);
+        return;
+      }
 
       if (chunkQueue <= 0 || readArray[tmp_fakeread_i] == null) {
         console.log('  waiting for chunks to be available..');
@@ -92,7 +101,21 @@
 
       // TODO: Replace direct call to md4 library to web worker dispatcher
       if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend) {
-        file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+        var myworker = new Worker('md4-worker.js');
+        myworker.onmessage = function(e) {
+          console.log('the worker responded with "',e,'"');
+          file_md4[e.data.index] = e.data.md4;
+
+          workers--;
+        };
+        myworker.postMessage({'index': tmp_fakeread_i,
+                              'data': readArray[tmp_fakeread_i]},
+            [readArray[tmp_fakeread_i]]);
+        workers++;
+
+        // dumb mode
+        //file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+
         (func_progress && setTimeout(func_progress(f,
           Math.round(++comp_chunks*comp_multiplier)), 1)
         );
@@ -100,6 +123,7 @@
       else
         console.log('  this block is nullend, ignoring.');
 
+      fakeread_i.shift();
       delete readArray[tmp_fakeread_i];
       chunkQueue -= 1;
 
