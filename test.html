@@ -8,10 +8,9 @@
 
 <script src="external/js-md4/build/md4.min.js"></script>
 <script>
-  var ed2k_files = ed2k_files || (function(files, _ed2k_nullend) {
+  var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_finish) {
     "use strict";
 
-    var fileOffset = 0;
     var readArray = [];
     var readOffset = 0;
     var readOffset_i = 0;
@@ -19,14 +18,10 @@
     var fakeread_i = [];
 
     var file_md4 = new Array();
-    var ed2k_nullend = _ed2k_nullend || false;
+    var comp_chunks = 0;
+    var comp_multiplier = 100 / Math.ceil(f.size / 9728000);
+    var ed2k_nullend = ed2k_nullend || false;
 
-    var f = files[fileOffset++];
-    if (!f)
-      return;
-
-    console.log('ed2k_files: nullend mode is ' +
-      (ed2k_nullend && 'enabled' || 'disabled'));
     console.log('process_files: starting', f.name);
     processFiles();
     whatsHappening();
@@ -69,21 +64,9 @@
         }
         console.log('process_files: ed2k_hash=', ed2k_hash);
         console.log('process_files: finished', f.name);
-        f = files[fileOffset++];
-        readOffset = 0;
-        readOffset_i = 0;
-        fakeread_i = [];
-        chunkQueue = 0;
-        file_md4 = new Array();
-
-        if (f) {
-          console.log('process_files: starting', f.name);
-        } else {
-          console.log('process_files: all files processed.');
-          return;
-        }
-      } else {
-        //console.log('process_files: still processing', f.name);
+        (func_finish && setTimeout(func_finish(f, ed2k_hash), 1));
+        f = null;
+        return;
       }
 
       setTimeout(processFiles, 250);
@@ -108,8 +91,12 @@
       console.log('"reading" ' + tmp_fakeread_i);
 
       // TODO: Replace direct call to md4 library to web worker dispatcher
-      if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend)
+      if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend) {
         file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+        (func_progress && setTimeout(func_progress(f,
+          Math.round(++comp_chunks*comp_multiplier)), 1)
+        );
+      }
       else
         console.log('  this block is nullend, ignoring.');
 
@@ -142,6 +129,40 @@
       HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
       HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
     }
+  });
+
+  var ed2k_files = ed2k_files || (function(files, ed2k_nullend) {
+    "use strict";
+
+    var fileOffset = 0;
+    var ed2k_nullend = ed2k_nullend || false;
+    var ed2k_hashes = [];
+    var f = files[fileOffset++];
+
+    var ed2k_chunk_processed = function(_file, _progress) {
+      console.log('completeness name=' + _file.name + ' ' + _progress + '%');
+    }
+
+    var ed2k_file_finished = function(_file, _ed2k_hash) {
+      ed2k_hashes[_file.name] = _ed2k_hash;
+      f = files[fileOffset++];
+      console.log('ed2k_file_finished CALLBACK EXECUTED', ed2k_hashes);
+      if (f) {
+        // proceed to next file
+        ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
+      } else {
+        console.log('process_files: all files processed.');
+        return;
+      }
+    }
+
+    if (!f)
+      return;
+
+    console.log('ed2k_files: nullend mode is ' +
+      (ed2k_nullend && 'enabled' || 'disabled'));
+
+    ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
   });
 </script>
 <script>
