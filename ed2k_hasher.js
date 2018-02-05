@@ -31,6 +31,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         function(evt) {
           readArray[tmp_readOffset_i] = evt.target.result;
           fakeread_i.push(tmp_readOffset_i);
+          // there may be no workers available, so we're dependent on workers
+          // calling the work dispatcher for us.
           setTimeout(whatsHappening, 0);
         }, false
       );
@@ -63,18 +65,15 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       f = null;
       return;
     }
-
-    //setTimeout(processFiles, 250);
   }
 
   function whatsHappening() {
-    var tmp_availablechunks = fakeread_i.length;
     var tmp_fakeread_i = fakeread_i[0];
 
     if (!f)
       return;
 
-    //console.log('chunk availability ' + tmp_availablechunks + '/' + chunkQueue);
+    //console.log('chunk availability ' + fakeread_i.length + '/' + chunkQueue);
 
     if (work_manager.workerNotAvailable()) {
       //console.log('  waiting for worker to finish...');
@@ -115,6 +114,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       chunkQueue -= 1;
     }
 
+    // we have consumed some chunks. want more.
     setTimeout(processFiles, 0);
   }
 
@@ -129,8 +129,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         file_md4[e.data.index] = e.data.md4;
 
         available_workers.push(e.data.workerid);
-        setTimeout(whatsHappening, 0);
-        setTimeout(processFiles, 0);
+        setTimeout(whatsHappening, 0); // worker is available. give us a job.
+        setTimeout(processFiles, 0); // are we there yet?
         //console.log('workManager: worker' + e.data.workerid +
         //            ': finished index ' + e.data.index);
       };
