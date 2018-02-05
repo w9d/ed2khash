@@ -113,6 +113,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         (chunkQueue > 0 && readArray[tmp_fakeread_i] != null)) {
       if (readArray[tmp_fakeread_i].byteLength == 0 && !ed2k_nullend) {
         fakeread_i.shift();
+        readArray[tmp_fakeread_i] = null;
         delete readArray[tmp_fakeread_i];
         tmp_fakeread_i = fakeread_i[0];
         chunkQueue -= 1;
@@ -130,6 +131,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         Math.round(++comp_chunks*comp_multiplier))
       );
       fakeread_i.shift();
+      readArray[tmp_fakeread_i] = null;
       delete readArray[tmp_fakeread_i];
       tmp_fakeread_i = fakeread_i[0];
       chunkQueue -= 1;
@@ -151,6 +153,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         file_md4[e.data.index] = e.data.md4;
 
         available_workers.push(e.data.workerid);
+        e.data.dirty = null;
+        delete e.data.dirty;
         setTimeout(giveWorkersWork, 0); // worker is available. give us a job.
         setTimeout(areWeThereYet, 0); // are we there yet?
         //console.log('workManager: worker' + e.data.workerid +
