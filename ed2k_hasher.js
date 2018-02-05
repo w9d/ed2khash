@@ -140,7 +140,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   }
 
   function workManager() {
-    const max_workers = 1;
+    const compute_capacity = (navigator.hardwareConcurrency || 2);
+    const max_workers = (compute_capacity <= 2) && compute_capacity || 2;
     var worker = [];
     var available_workers = [];
 
