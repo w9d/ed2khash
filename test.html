@@ -195,6 +195,7 @@
     var ed2k_nullend = ed2k_nullend || false;
     var ed2k_hashes = [];
     var f = files[fileOffset++];
+    var before;
 
     var ed2k_chunk_processed = function(_file, _progress) {
       console.log('completeness name=' + _file.name + ' ' + _progress + '%');
@@ -208,7 +209,8 @@
         // proceed to next file
         ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
       } else {
-        console.log('process_files: all files processed.');
+        console.log('process_files: all files processed. took ' +
+          (Date.now()-before) + 'ms.');
         return;
       }
     }
@@ -220,6 +222,8 @@
       (ed2k_nullend && 'enabled' || 'disabled'));
 
     (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
+
+    before = Date.now();
     ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
   });
 </script>
