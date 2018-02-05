@@ -188,23 +188,23 @@
     }
   });
 
-  var ed2k_files = ed2k_files || (function(files, ed2k_nullend) {
+  var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, func_finish) {
     "use strict";
 
     var fileOffset = 0;
     var ed2k_nullend = ed2k_nullend || false;
-    var ed2k_hashes = [];
     var f = files[fileOffset++];
     var before;
 
     var ed2k_chunk_processed = function(_file, _progress) {
       console.log('completeness name=' + _file.name + ' ' + _progress + '%');
+      (func_progress) && setTimeout(func_progress, 1, _file, _progress);
     }
 
     var ed2k_file_finished = function(_file, _ed2k_hash) {
-      ed2k_hashes[_file.name] = _ed2k_hash;
       f = files[fileOffset++];
-      console.log('ed2k_file_finished CALLBACK EXECUTED', ed2k_hashes);
+      (func_finish) && setTimeout(func_finish, 1, _file, _ed2k_hash);
+
       if (f) {
         // proceed to next file
         ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
