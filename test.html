@@ -99,11 +99,13 @@
 
       // TODO: Replace direct call to md4 library to web worker dispatcher
       if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend) {
-        work_manager.dispatchWork({'index': tmp_fakeread_i,
+        if (window.Worker) {
+          work_manager.dispatchWork({'index': tmp_fakeread_i,
                               'data': readArray[tmp_fakeread_i]});
-
-        // dumb mode
-        //file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+        } else {
+          // dumb mode
+          file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+        }
         (func_progress && setTimeout(func_progress, 1, f,
           Math.round(++comp_chunks*comp_multiplier))
         );
@@ -217,6 +219,7 @@
     console.log('ed2k_files: nullend mode is ' +
       (ed2k_nullend && 'enabled' || 'disabled'));
 
+    (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
     ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
   });
 </script>
