@@ -5,6 +5,7 @@
 <button id="process" name="process_files" disabled="true">Process</button>
 </div>
 <output id="list"></output>
+<textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
 
 <script src="external/js-md4/src/md4.js"></script>
 <script>
@@ -228,7 +229,8 @@
   });
 </script>
 <script>
-  var files = new Array();
+  var files = [];
+  var ed2k_text = document.getElementById('ed2k_text');
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -254,6 +256,7 @@
 
   function resetEverything(evt) {
     files = new Array();
+    ed2k_text.value = '';
     document.getElementById('list').innerHTML = '';
     document.getElementById('files').value = '';
     document.getElementById('reset').disabled = true;
@@ -262,14 +265,37 @@
   }
 
   function startProcessingFiles(evt) {
+    var output = [];
+
     if (!(files[0])) {
       console.log('process_files: no file to process, this should never happen');
       return;
     }
 
-    document.getElementById('process').disabled = true;
+    var regenerate_ed2k_text = function() {
+      ed2k_text.value = '';
 
-    var ed2ker = new ed2k_files(files);
+      for (var i = 0, f; f = files[i]; i++) {
+        var fsize = output[f.name].size;
+        var fpercent = output[f.name].percent;
+        var fed2khash = output[f.name].hash;
+        ed2k_text.value += '|' + f.name + '|' + fsize + '|' +
+          (fed2khash && fed2khash || '[---'+fpercent+'---]') + '|\n';
+      }
+    }
+    var ed2k_progress = function(_file, _percent) {
+      output[_file.name].percent = _percent;
+      regenerate_ed2k_text();
+    }
+    var ed2k_file_done = function(_file, _ed2ksum) {
+      output[_file.name].hash = _ed2ksum;
+      regenerate_ed2k_text();
+    }
+    for (var i = 0, f; f = files[i]; i++) {
+      output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
+    }
+
+    var ed2ker = new ed2k_files(files, null, ed2k_progress, ed2k_file_done);
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
