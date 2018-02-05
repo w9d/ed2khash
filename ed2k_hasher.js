@@ -16,9 +16,16 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   var ed2k_nullend = ed2k_nullend && true;
 
   console.log('process_files: starting', f.name);
-  setTimeout(processFiles, 0);
+  setTimeout(giveMeChunks, 0);
 
-  function processFiles() {
+  /* giveMeChunks: Slice file (f) into 9728000 byte chunks and asyncronously
+   * read it into readArray. readArray can be accessed at any index listed in
+   * the fakeread_i array.
+   *
+   * This function is executed above at ed2k_file load and after a successful
+   * job dispatch from giveWorkersWork.
+   */
+  function giveMeChunks() {
     while (chunkQueue < 6 && !(readOffset > f.size)) {
       var file = new FileReader();
 
@@ -33,7 +40,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
           fakeread_i.push(tmp_readOffset_i);
           // there may be no workers available, so we're dependent on workers
           // calling the work dispatcher for us.
-          setTimeout(whatsHappening, 0);
+          work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
         }, false
       );
 
@@ -41,7 +48,13 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       readOffset_i += 1;
       chunkQueue += 1;
     }
+  }
 
+  /* areWeThereYet: Checks to see if we are finished.
+   *
+   * This function is executed by every web worker callback.
+   */
+  function areWeThereYet() {
     if (readOffset > f.size && chunkQueue <= 0 &&
         work_manager.notDoingAnything() &&
         readArray[readArray.length - 1] == null) {
@@ -67,7 +80,15 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     }
   }
 
-  function whatsHappening() {
+  /* giveWorkersWork: If workers are available, tell them to do something.
+   *
+   * This function is executed by each FileReader loadend callback and by every
+   * web worker callback.
+   *
+   * TODO: Allay my fears that upon slowdown this callback convention may stop
+   * working.
+   */
+  function giveWorkersWork() {
     var tmp_fakeread_i = fakeread_i[0];
 
     if (!f)
@@ -115,7 +136,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     }
 
     // we have consumed some chunks. want more.
-    setTimeout(processFiles, 0);
+    setTimeout(giveMeChunks, 0);
   }
 
   function workManager() {
@@ -129,8 +150,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         file_md4[e.data.index] = e.data.md4;
 
         available_workers.push(e.data.workerid);
-        setTimeout(whatsHappening, 0); // worker is available. give us a job.
-        setTimeout(processFiles, 0); // are we there yet?
+        setTimeout(giveWorkersWork, 0); // worker is available. give us a job.
+        setTimeout(areWeThereYet, 0); // are we there yet?
         //console.log('workManager: worker' + e.data.workerid +
         //            ': finished index ' + e.data.index);
       };
