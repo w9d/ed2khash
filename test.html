@@ -3,6 +3,7 @@
 <input type="file" id="files" name="_files[]" multiple /><br />
 <button id="reset" name="reset_files" disabled="true">Reset</button>
 <button id="process" name="process_files" disabled="true">Process</button>
+<input id="nullendmode" type="checkbox">NULL-end-on-boundary mode</input>
 </div>
 <output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
@@ -295,7 +296,9 @@
       output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
     }
 
-    var ed2ker = new ed2k_files(files, null, ed2k_progress, ed2k_file_done);
+    var ed2ker = new ed2k_files(files,
+      document.getElementById('nullendmode').checked,
+      ed2k_progress, ed2k_file_done);
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
