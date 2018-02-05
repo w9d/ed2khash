@@ -77,9 +77,8 @@
       output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
     }
 
-    var ed2ker = new ed2k_files(files,
-      document.getElementById('nullendmode').checked,
-      ed2k_progress, ed2k_file_done);
+    var ed2k_nullend = document.getElementById('nullendmode').checked;
+    var ed2ker = new ed2k_files(files, ed2k_nullend, ed2k_progress, ed2k_file_done);
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
