@@ -85,12 +85,12 @@
       //console.log('chunk availability ' + tmp_availablechunks + '/' + chunkQueue);
 
       if (work_manager.workerNotAvailable()) {
-        console.log('  waiting for worker to finish...');
+        //console.log('  waiting for worker to finish...');
         return;
       }
 
       if (chunkQueue <= 0 || readArray[tmp_fakeread_i] == null) {
-        console.log('  waiting for chunks to be available..');
+        //console.log('  waiting for chunks to be available..');
         return;
       }
 
