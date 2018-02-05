@@ -57,8 +57,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         // file is less than 9728001 in non-nullend mode
         ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
       }
-      console.log('process_files: ed2k_hash=', ed2k_hash);
-      console.log('process_files: finished', f.name);
+      //console.log('process_files: ed2k_hash=', ed2k_hash);
+      //console.log('process_files: finished', f.name);
       (func_finish && setTimeout(func_finish, 1, f, ed2k_hash));
       f = null;
       return;
@@ -87,7 +87,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     }
 
     //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
-    console.log('"reading" ' + tmp_fakeread_i);
+    //console.log('"reading" ' + tmp_fakeread_i);
 
     // TODO: Replace direct call to md4 library to web worker dispatcher
     if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend) {
@@ -102,8 +102,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         Math.round(++comp_chunks*comp_multiplier))
       );
     }
-    else
-      console.log('  this block is nullend, ignoring.');
+    //else
+    //  console.log('  this block is nullend, ignoring.');
 
     fakeread_i.shift();
     delete readArray[tmp_fakeread_i];
@@ -189,7 +189,7 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
   var before;
 
   var ed2k_chunk_processed = function(_file, _progress) {
-    console.log('completeness name=' + _file.name + ' ' + _progress + '%');
+    //console.log('completeness name=' + _file.name + ' ' + _progress + '%');
     (func_progress) && setTimeout(func_progress, 1, _file, _progress);
   }
 
