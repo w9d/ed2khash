@@ -119,7 +119,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   }
 
   function workManager() {
-    const max_workers = 2;
+    const max_workers = 1;
     var worker = [];
     var available_workers = [];
 
