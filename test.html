@@ -24,7 +24,7 @@
     var ed2k_nullend = ed2k_nullend || false;
 
     console.log('process_files: starting', f.name);
-    processFiles();
+    setTimeout(processFiles, 0);
 
     function processFiles() {
       while (chunkQueue < 6 && !(readOffset > f.size)) {
@@ -72,7 +72,7 @@
         return;
       }
 
-      setTimeout(processFiles, 250);
+      //setTimeout(processFiles, 250);
     }
 
     function whatsHappening() {
@@ -115,6 +115,8 @@
       fakeread_i.shift();
       delete readArray[tmp_fakeread_i];
       chunkQueue -= 1;
+
+      setTimeout(processFiles, 0);
     }
 
     function workManager() {
@@ -129,9 +131,10 @@
           file_md4[e.data.index] = e.data.md4;
 
           available_workers.push(e.data.workerid);
-          setTimeout(whatsHappening, 0, true);
-          console.log('workManager: worker' + e.data.workerid +
-                      ': finished index ' + e.data.index);
+          setTimeout(whatsHappening, 0);
+          setTimeout(processFiles, 0);
+          //console.log('workManager: worker' + e.data.workerid +
+          //            ': finished index ' + e.data.index);
         };
         available_workers.push(i);
         console.log('workManager: created worker' + i);
