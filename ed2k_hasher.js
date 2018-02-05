@@ -89,8 +89,16 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
     //console.log('"reading" ' + tmp_fakeread_i);
 
-    // TODO: Replace direct call to md4 library to web worker dispatcher
-    if (readArray[tmp_fakeread_i].byteLength > 0 || ed2k_nullend) {
+    while (work_manager.workerAvailable() &&
+        (chunkQueue > 0 && readArray[tmp_fakeread_i] != null)) {
+      if (readArray[tmp_fakeread_i].byteLength == 0 && !ed2k_nullend) {
+        fakeread_i.shift();
+        delete readArray[tmp_fakeread_i];
+        tmp_fakeread_i = fakeread_i[0];
+        chunkQueue -= 1;
+        continue;
+      }
+
       if (window.Worker) {
         work_manager.dispatchWork({'index': tmp_fakeread_i,
                             'data': readArray[tmp_fakeread_i]});
@@ -101,13 +109,11 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       (func_progress && setTimeout(func_progress, 1, f,
         Math.round(++comp_chunks*comp_multiplier))
       );
+      fakeread_i.shift();
+      delete readArray[tmp_fakeread_i];
+      tmp_fakeread_i = fakeread_i[0];
+      chunkQueue -= 1;
     }
-    //else
-    //  console.log('  this block is nullend, ignoring.');
-
-    fakeread_i.shift();
-    delete readArray[tmp_fakeread_i];
-    chunkQueue -= 1;
 
     setTimeout(processFiles, 0);
   }
