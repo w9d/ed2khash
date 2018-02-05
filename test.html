@@ -22,7 +22,8 @@
 
     var file_md4 = new Array();
     var comp_chunks = 0;
-    var comp_multiplier = 100 / Math.ceil(f.size / 9728000);
+    var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
+      (ed2k_nullend && 1 || 0));
     var ed2k_nullend = ed2k_nullend || false;
 
     console.log('process_files: starting', f.name);
