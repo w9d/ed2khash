@@ -67,7 +67,7 @@
         }
         console.log('process_files: ed2k_hash=', ed2k_hash);
         console.log('process_files: finished', f.name);
-        (func_finish && setTimeout(func_finish(f, ed2k_hash), 1));
+        (func_finish && setTimeout(func_finish, 1, f, ed2k_hash));
         f = null;
         return;
       }
@@ -104,9 +104,8 @@
 
         // dumb mode
         //file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
-
-        (func_progress && setTimeout(func_progress(f,
-          Math.round(++comp_chunks*comp_multiplier)), 1)
+        (func_progress && setTimeout(func_progress, 1, f,
+          Math.round(++comp_chunks*comp_multiplier))
         );
       }
       else
