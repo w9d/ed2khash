@@ -14,6 +14,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
     (ed2k_nullend && 1 || 0));
   var ed2k_nullend = ed2k_nullend && true;
+  var delay = {'read': [], 'queuewait': [], 'workerwait': []};
 
   console.log('process_files: starting', f.name);
   setTimeout(giveMeChunks, 0);
@@ -32,12 +33,15 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
       file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
+      delay.read[readOffset_i] = Date.now();
 
       let tmp_readOffset_i = readOffset_i;
       file.addEventListener('loadend',
         function(evt) {
           readArray[tmp_readOffset_i] = evt.target.result;
           fakeread_i.push(tmp_readOffset_i);
+          delay.read[tmp_readOffset_i] = Date.now() - delay.read[tmp_readOffset_i];
+          delay.queuewait[tmp_readOffset_i] = Date.now();
           // there may be no workers available, so we're dependent on workers
           // calling the work dispatcher for us.
           work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
@@ -55,6 +59,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
    * This function is executed by every web worker callback.
    */
   function areWeThereYet() {
+    var read_delay = 0, queuewait_delay = 0, workerwait_delay = 0;
+
     if (readOffset > f.size && chunkQueue <= 0 &&
         work_manager.notDoingAnything() &&
         readArray[readArray.length - 1] == null) {
@@ -72,8 +78,21 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         // file is less than 9728001 in non-nullend mode
         ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
       }
+      for (var i = 0; i < delay.read.length; i++) {
+        read_delay += delay.read[i];
+        queuewait_delay += delay.queuewait[i];
+        workerwait_delay += delay.workerwait[i];
+      }
       //console.log('process_files: ed2k_hash=', ed2k_hash);
       //console.log('process_files: finished', f.name);
+      console.log('delays: ' + read_delay + 'ms (FileReader)' +
+          ', ' + queuewait_delay + 'ms (worker availability)' +
+          ' and ' + workerwait_delay + 'ms (worker callbacks)');
+
+      console.log('delays (FileReader): ' + delay.read);
+      console.log('delays (worker ava): ' + delay.queuewait);
+      console.log('delays (worker call):' + delay.workerwait);
+
       (func_finish && setTimeout(func_finish, 1, f, ed2k_hash));
       f = null;
       return;
@@ -102,7 +121,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     }
 
     if (chunkQueue <= 0 || readArray[tmp_fakeread_i] == null) {
-      //console.log('  waiting for chunks to be available..');
+      console.log(' queue starvation, worker(s) available but we have nothing to give them');
       return;
     }
 
@@ -153,6 +172,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         file_md4[e.data.index] = e.data.md4;
 
         available_workers.push(e.data.workerid);
+        delay.workerwait[e.data.index] = Date.now() - delay.workerwait[e.data.index];
+
         e.data.dirty = null;
         delete e.data.dirty;
         setTimeout(giveWorkersWork, 0); // worker is available. give us a job.
@@ -168,6 +189,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       if (this.workerNotAvailable())
         return;
 
+      delay.queuewait[e.index] = Date.now() - delay.queuewait[e.index];
+      delay.workerwait[e.index] = Date.now();
       var workerid = available_workers.shift();
       worker[workerid].postMessage({'workerid': workerid, 'index': e.index,
           'data': e.data}, [e.data]);
