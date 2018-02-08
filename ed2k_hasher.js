@@ -247,12 +247,12 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
 
   var ed2k_chunk_processed = function(_file, _progress) {
     //console.log('completeness name=' + _file.name + ' ' + _progress + '%');
-    (func_progress) && setTimeout(func_progress, 1, _file, _progress);
+    (func_progress) && func_progress(_file, _progress);
   }
 
   var ed2k_file_finished = function(_file, _ed2k_hash) {
     f = files[fileOffset++];
-    (func_finish) && setTimeout(func_finish, 1, _file, _ed2k_hash);
+    (func_finish) && func_finish(_file, _ed2k_hash);
 
     if (f) {
       // proceed to next file
