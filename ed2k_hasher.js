@@ -27,8 +27,11 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
    * job dispatch from giveWorkersWork.
    */
   function giveMeChunks() {
+    if (!f)
+      return;
+
     while (chunkQueue < 6 && !(readOffset > f.size)) {
-      var file = new FileReader();
+      var file = new window.FileReader();
 
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
@@ -167,7 +170,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     var available_workers = [];
 
     for (var i = 0; i < max_workers; i++) {
-      worker[i] = new Worker('md4-worker.js');
+      worker[i] = new window.Worker('md4-worker.js');
       worker[i].onmessage = function(e) {
         file_md4[e.data.index] = e.data.md4;
 
@@ -272,4 +275,16 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
   before = Date.now();
   ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
 });
-  
+
+if (typeof window !== 'object' && typeof process === 'object' &&
+    process.versions && process.versions.node) {
+  var passMocks = function(_window, _navigator, _md4) {
+    window = _window;
+    navigator = _navigator;
+    md4 = _md4;
+  };
+  module.exports = {
+    ed2k_files: ed2k_files,
+    passMocks: passMocks
+  };
+}
