@@ -97,6 +97,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       console.log('delays (worker call):' + delay.workerwait);
 
       (func_finish && setTimeout(func_finish, 1, f, ed2k_hash));
+
+      work_manager.terminateWorkers();
       f = null;
       return;
     }
@@ -197,6 +199,14 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       var workerid = available_workers.shift();
       worker[workerid].postMessage({'workerid': workerid, 'index': e.index,
           'data': e.data}, [e.data]);
+    });
+
+    this.terminateWorkers = (function() {
+      for (var i = 0; i < max_workers; i++) {
+        worker[i].terminate();
+      }
+      worker = [];
+      available_workers = [];
     });
 
     this.workerAvailable = (function() {
