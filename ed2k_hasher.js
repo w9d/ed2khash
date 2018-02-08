@@ -11,9 +11,9 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
 
   var file_md4 = new Array();
   var comp_chunks = 0;
+  var ed2k_nullend = (ed2k_nullend === undefined) && true || ed2k_nullend;
   var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
     (ed2k_nullend && 1 || 0));
-  var ed2k_nullend = ed2k_nullend && true;
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
 
   console.log('process_files: starting', f.name);
@@ -238,7 +238,7 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
   "use strict";
 
   var fileOffset = 0;
-  var ed2k_nullend = ed2k_nullend && true;
+  var ed2k_nullend = (ed2k_nullend === undefined) && true || ed2k_nullend;
   var f = files[fileOffset++];
   var before;
 
