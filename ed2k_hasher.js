@@ -1,5 +1,5 @@
 
-var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_finish) {
+var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   "use strict";
 
   var readArray = [];
@@ -13,7 +13,7 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
 
   var file_md4 = new Array();
   var comp_chunks = 0;
-  var ed2k_nullend = (ed2k_nullend === undefined) && true || ed2k_nullend;
+  var ed2k_nullend = opts.nullend;
   var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
     (ed2k_nullend && 1 || 0));
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
@@ -253,11 +253,13 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   }
 });
 
-var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, func_finish) {
+var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts) {
   "use strict";
 
   var fileOffset = 0;
-  var ed2k_nullend = (ed2k_nullend === undefined) && true || ed2k_nullend;
+  var opts = (opts) || {};
+  (opts.nullend === undefined) && (opts.nullend = true);
+
   var f = files[fileOffset++];
   var before;
 
@@ -272,7 +274,7 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
 
     if (f) {
       // proceed to next file
-      ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
+      ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished, opts);
     } else {
       console.log('process_files: all files processed. took ' +
         (Date.now()-before) + 'ms.');
@@ -284,12 +286,12 @@ var ed2k_files = ed2k_files || (function(files, ed2k_nullend, func_progress, fun
     return;
 
   console.log('ed2k_files: nullend mode is ' +
-    (ed2k_nullend && 'enabled' || 'disabled'));
+    (opts.nullend && 'enabled' || 'disabled'));
 
   (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
 
   before = Date.now();
-  ed2k_file(f, ed2k_nullend, ed2k_chunk_processed, ed2k_file_finished);
+  ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished, opts);
 });
 
 if (typeof window !== 'object' && typeof process === 'object' &&
