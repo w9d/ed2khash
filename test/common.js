@@ -22,11 +22,11 @@ var MockFile = (function(bits_noop, name, opts) {
     var options = {};
     var result = new MockFile(null, this.name, options);
     result.lastModified = this.lastModified;
-    // TODO: result._end - result._start; might need secret size for _genFunc
-    result.size = this.size;
     result.type = this.type;
     result._start = start;
     result._end = (end > this.size) && this.size || end;
+    result.size = result._end - result._start;
+    result._orig_size = this.size;
     result._genFunc = this._genFunc;
 
     return result;
@@ -50,7 +50,7 @@ var MockFileReader = (function() {
   this.readAsArrayBuffer = (function (mockfile) {
     var evt = {};
     evt.target = {};
-    evt.target.result = mockfile._genFunc(mockfile._start, mockfile._end, mockfile.size);
+    evt.target.result = mockfile._genFunc(mockfile._start, mockfile._end, mockfile._orig_size);
 
     var deferred_callbacks = (function () {
       for (var i = 0; i < _callbacks['loadend'].length; i++) {
