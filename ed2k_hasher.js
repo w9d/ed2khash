@@ -32,7 +32,9 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     if (!f)
       return;
 
-    while (chunkQueue < 6 && !(readOffset > f.size)) {
+    while (chunkQueue < 6 &&
+        ((ed2k_nullend && readOffset <= f.size) ||
+         (!ed2k_nullend && readOffset < f.size))) {
       var file = new window.FileReader();
 
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
@@ -69,7 +71,9 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     if (!f)
       return;
 
-    if (readOffset > f.size && chunkQueue <= 0 &&
+    if (chunkQueue <= 0 &&
+        ((ed2k_nullend && readOffset > f.size) ||
+         (!ed2k_nullend && readOffset >= f.size)) &&
         work_manager.notDoingAnything() &&
         readArray[readArray.length - 1] == null) {
       // calculate final hash...
@@ -140,14 +144,6 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
 
     while (work_manager.workerAvailable() &&
         (chunkQueue > 0 && readArray[tmp_fakeread_i] != null)) {
-      if (readArray[tmp_fakeread_i].byteLength == 0 && !ed2k_nullend) {
-        fakeread_i.shift();
-        readArray[tmp_fakeread_i] = null;
-        delete readArray[tmp_fakeread_i];
-        tmp_fakeread_i = fakeread_i[0];
-        chunkQueue -= 1;
-        continue;
-      }
 
       if (using_workers) {
         work_manager.dispatchWork({'index': tmp_fakeread_i,
