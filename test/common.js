@@ -8,7 +8,7 @@ var genZero = function(start, end, size) {
   return buffer.buffer;
 }
 
-var MockFile = function(bits_noop, name, opts) {
+var MockFile = (function(bits_noop, name, opts) {
   (opts) || (opts = {});
   this.name = name;
   this.lastModified = (opts.lastModified) || Date.now();
@@ -31,7 +31,17 @@ var MockFile = function(bits_noop, name, opts) {
 
     return result;
   });
-};
+
+  this._test = (function(fn, size) {
+    var result = this;
+    result.name = 'test.ts';
+    result.size = size;
+    result._end = size;
+    result._genFunc = fn;
+
+    return result;
+  });
+});
 
 var MockFileReader = (function() {
   var _events = [];
