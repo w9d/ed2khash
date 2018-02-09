@@ -14,8 +14,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   var file_md4 = new Array();
   var comp_chunks = 0;
   var ed2k_nullend = opts.nullend;
-  var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
-    (ed2k_nullend && 1 || 0));
+  var comp_multiplier = 100 / (Math.ceil(f.size / 9728000));
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
   var read_size = opts.chunksperread * 9728000;
   var fill_queue = true;
