@@ -66,6 +66,9 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   function areWeThereYet() {
     var read_delay = 0, queuewait_delay = 0, workerwait_delay = 0;
 
+    if (!f)
+      return;
+
     if (readOffset > f.size && chunkQueue <= 0 &&
         work_manager.notDoingAnything() &&
         readArray[readArray.length - 1] == null) {
