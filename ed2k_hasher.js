@@ -95,7 +95,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
 
     if (chunkQueue <= 0 && readOffset >= f.size &&
         work_manager.notDoingAnything() &&
-        readArray[readArray.length - 1] == null) {
+        fakeread_i[0] == null) {
       // calculate final hash...
       var ed2k_hash = md4.create();
       if ((ed2k_nullend && f.size >= 9728000) ||
