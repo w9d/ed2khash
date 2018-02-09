@@ -16,7 +16,6 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   var ed2k_nullend = opts.nullend;
   var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
     (ed2k_nullend && 1 || 0));
-  var file_size_nullend = ed2k_nullend && f.size || f.size - 1;
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
 
   console.log('process_files: starting', f.name);
@@ -33,7 +32,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (!f)
       return;
 
-    while (chunkQueue < 6 && readOffset <= file_size_nullend) {
+    while (chunkQueue < 6 && readOffset < f.size) {
       var file = new window.FileReader();
 
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
@@ -70,14 +69,15 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (!f)
       return;
 
-    if (chunkQueue <= 0 && readOffset > file_size_nullend &&
+    if (chunkQueue <= 0 && readOffset >= f.size &&
         work_manager.notDoingAnything() &&
         readArray[readArray.length - 1] == null) {
       // calculate final hash...
       var ed2k_hash = md4.create();
       if ((ed2k_nullend && f.size >= 9728000) ||
         (!ed2k_nullend && f.size > 9728000)) {
-        // file is more than one chunk, no special bullshit necessary
+        if ((f.size % 9728000) == 0 && f.size > 0 && ed2k_nullend)
+          file_md4.push(md4.arrayBuffer(new ArrayBuffer(0)));
         for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
           ed2k_hash.update(file_md4[i]);
         }
