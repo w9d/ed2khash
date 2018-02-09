@@ -112,9 +112,9 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
         ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
       }
       for (var i = 0; i < delay.read.length; i++) {
-        read_delay += delay.read[i];
+        read_delay += delay.read[i] && delay.read[i] || 0;
         queuewait_delay += delay.queuewait[i];
-        workerwait_delay += delay.workerwait[i];
+        workerwait_delay += delay.workerwait[i] && delay.workerwait[i] || 0;
       }
       //console.log('process_files: ed2k_hash=', ed2k_hash);
       //console.log('process_files: finished', f.name);
@@ -171,8 +171,8 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
                             'data': readArray[tmp_fakeread_i]});
       } else {
         // dumb mode
-        file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
         delay.queuewait[tmp_fakeread_i] = Date.now() - delay.queuewait[tmp_fakeread_i];
+        file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
         setTimeout(areWeThereYet, 0);
       }
       (func_progress && setTimeout(func_progress, 1, f,
