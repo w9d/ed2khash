@@ -22,6 +22,7 @@ var MockFile = function(bits_noop, name, opts) {
     var options = {};
     var result = new MockFile(null, this.name, options);
     result.lastModified = this.lastModified;
+    // TODO: result._end - result._start; might need secret size for _genFunc
     result.size = this.size;
     result.type = this.type;
     result._start = start;
