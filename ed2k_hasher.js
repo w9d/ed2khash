@@ -7,6 +7,8 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
   var readOffset_i = 0;
   var chunkQueue = 0;
   var fakeread_i = [];
+  const using_workers = (window.Worker &&
+                         typeof ED2K_NODE_ENVIRON === 'undefined');
   var work_manager = new workManager();
 
   var file_md4 = new Array();
@@ -144,12 +146,14 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
         continue;
       }
 
-      if (window.Worker) {
+      if (using_workers) {
         work_manager.dispatchWork({'index': tmp_fakeread_i,
                             'data': readArray[tmp_fakeread_i]});
       } else {
         // dumb mode
         file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
+        delay.queuewait[tmp_fakeread_i] = Date.now() - delay.queuewait[tmp_fakeread_i];
+        setTimeout(areWeThereYet, 0);
       }
       (func_progress && setTimeout(func_progress, 1, f,
         Math.round(++comp_chunks*comp_multiplier))
@@ -171,6 +175,40 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
     var worker = [];
     var available_workers = [];
 
+    this.dispatchWork = (function(e) {
+      if (this.workerNotAvailable())
+        return;
+
+      delay.queuewait[e.index] = Date.now() - delay.queuewait[e.index];
+      delay.workerwait[e.index] = Date.now();
+      var workerid = available_workers.shift();
+      worker[workerid].postMessage({'workerid': workerid, 'index': e.index,
+          'data': e.data}, [e.data]);
+    });
+
+    this.terminateWorkers = (function() {
+      for (var i = 0; i < worker.length; i++) {
+        worker[i].terminate();
+      }
+      worker = [];
+      available_workers = [];
+    });
+
+    this.workerAvailable = (function() {
+      return available_workers.length != 0 || !using_workers;
+    });
+
+    this.workerNotAvailable = (function() {
+      return available_workers.length == 0 && using_workers;
+    });
+
+    this.notDoingAnything = (function() {
+      return available_workers.length == max_workers || !using_workers;
+    });
+
+    if (!using_workers)
+      return;
+
     for (var i = 0; i < max_workers; i++) {
       worker[i] = new window.Worker('md4-worker.js');
       worker[i].onmessage = function(e) {
@@ -189,37 +227,6 @@ var ed2k_file = ed2k_file || (function(f, ed2k_nullend, func_progress, func_fini
       available_workers.push(i);
       console.log('workManager: created worker' + i);
     }
-
-    this.dispatchWork = (function(e) {
-      if (this.workerNotAvailable())
-        return;
-
-      delay.queuewait[e.index] = Date.now() - delay.queuewait[e.index];
-      delay.workerwait[e.index] = Date.now();
-      var workerid = available_workers.shift();
-      worker[workerid].postMessage({'workerid': workerid, 'index': e.index,
-          'data': e.data}, [e.data]);
-    });
-
-    this.terminateWorkers = (function() {
-      for (var i = 0; i < max_workers; i++) {
-        worker[i].terminate();
-      }
-      worker = [];
-      available_workers = [];
-    });
-
-    this.workerAvailable = (function() {
-      return available_workers.length != 0;
-    });
-
-    this.workerNotAvailable = (function() {
-      return available_workers.length == 0;
-    });
-
-    this.notDoingAnything = (function() {
-      return available_workers.length == max_workers;
-    });
   }
 
   function arrayBufferToHexDigest(arr) {
@@ -293,6 +300,7 @@ if (typeof window !== 'object' && typeof process === 'object' &&
     navigator = _navigator;
     md4 = _md4;
   };
+  ED2K_NODE_ENVIRON = true;
   module.exports = {
     ed2k_files: ed2k_files,
     passMocks: passMocks
