@@ -17,6 +17,8 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   var comp_multiplier = 100 / (Math.ceil(f.size / 9728000) +
     (ed2k_nullend && 1 || 0));
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
+  var read_size = opts.chunksperread * 9728000;
+  var fill_queue = true;
 
   console.log('process_files: starting', f.name);
   setTimeout(giveMeChunks, 0);
@@ -32,31 +34,54 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (!f)
       return;
 
-    while (chunkQueue < 6 && readOffset < f.size) {
+    if (chunkQueue <= opts.readatlength)
+      fill_queue = true;
+
+    while (chunkQueue < opts.queuelength && fill_queue &&
+        readOffset < f.size) {
       var file = new window.FileReader();
 
-      //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
+      console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
-      file.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
+      file.readAsArrayBuffer(f.slice(readOffset, readOffset + read_size));
       delay.read[readOffset_i] = Date.now();
 
       let tmp_readOffset_i = readOffset_i;
       file.addEventListener('loadend',
         function(evt) {
-          readArray[tmp_readOffset_i] = evt.target.result;
-          fakeread_i.push(tmp_readOffset_i);
           delay.read[tmp_readOffset_i] = Date.now() - delay.read[tmp_readOffset_i];
-          delay.queuewait[tmp_readOffset_i] = Date.now();
+
+          for (var chunk, off_s = 0, off_e = 9728000, i = 0;
+               ((chunk = evt.target.result.slice(off_s, off_e)) || true) &&
+               off_s < evt.target.result.byteLength;
+               i++, off_s = off_e, off_e += 9728000) {
+            var real_offset = tmp_readOffset_i + i;
+            //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
+
+            readArray[real_offset] = chunk;
+            fakeread_i.push(real_offset);
+            delay.queuewait[real_offset] = Date.now();
+          }
+          if (evt.target.result.byteLength < read_size) {
+            // when reading multiple chunks we need to correct the chunkQueue
+            // length at the end since we assumed it'd increase by chunksperread
+            var bytes_remove = read_size - evt.target.result.byteLength;
+            var chunks_remove = Math.floor(bytes_remove / 9728000);
+            if (chunks_remove > 0)
+              chunkQueue -= chunks_remove;
+          }
           // there may be no workers available, so we're dependent on workers
           // calling the work dispatcher for us.
           work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
         }, false
       );
 
-      readOffset = readOffset + 9728000;
-      readOffset_i += 1;
-      chunkQueue += 1;
+      readOffset += read_size;
+      readOffset_i += opts.chunksperread;
+      chunkQueue += opts.chunksperread;
     }
+
+    fill_queue = false;
   }
 
   /* areWeThereYet: Checks to see if we are finished.
@@ -254,11 +279,28 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   "use strict";
 
   var fileOffset = 0;
-  var opts = (opts) || {};
+  var opts = opts || {};
   (opts.nullend === undefined) && (opts.nullend = true);
 
   var f = files[fileOffset++];
   var before;
+
+  if (opts.queuelength === undefined) {
+    opts.queuelength = 6;
+  }
+
+  if (opts.chunksperread === undefined) {
+    opts.chunksperread = 1;
+  } else {
+    // is opts.chunksperread a multiple of opts.queuelength?
+  }
+
+  if (opts.readatlength === undefined) {
+    opts.readatlength = 3;
+  } else {
+    // is opts.readatlength < opts.queuelength?
+    // is opts.readatlength a multiple of opts.queuelength?
+  }
 
   var ed2k_chunk_processed = function(_file, _progress) {
     //console.log('completeness name=' + _file.name + ' ' + _progress + '%');
