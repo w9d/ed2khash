@@ -8,6 +8,7 @@ Queue length: <input id="queuelength" type="text" value="12" size="3">
 Chunks per read: <input id="chunksperread" type="text" value="3" size="3">
 Read at queue length: <input id="readatlength" type="text" value="6" size="3">
 Workers: <input id="workerstospawn" type="text" value="1" size="3">
+= (<span id="sizeinfo"></span>)
 </div>
 <output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
@@ -27,6 +28,7 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   const select_chunksperread = document.getElementById('chunksperread');
   const select_readatlength = document.getElementById('readatlength');
   const select_workers = document.getElementById('workerstospawn');
+  const select_sizeinfo = document.getElementById('sizeinfo');
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -100,6 +102,16 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
     };
     ed2k_files(files, ed2k_progress, ed2k_file_done, options);
   }
+
+  function displaySituation() {
+    var read_mb = (parseInt(select_chunksperread.value) * 9.728).toPrecision(5);
+    var queue_mb = (parseInt(select_queuelength.value) * 9.728).toPrecision(5);
+    select_sizeinfo.textContent = read_mb + 'MB reads ' + queue_mb + 'MB queue';
+  }
+
+  displaySituation();
+  select_chunksperread.oninput = displaySituation;
+  select_queuelength.oninput = displaySituation;
 
   btnFileSelect.addEventListener('change', handleFileSelect, false);
   btnReset.addEventListener('click', resetEverything, false);
