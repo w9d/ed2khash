@@ -40,7 +40,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
         readOffset < f.size) {
       var file = new window.FileReader();
 
-      console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
+      //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
       var read_offset_end = limitValue(readOffset + read_size, f.size);
       file.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
@@ -183,8 +183,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   }
 
   function workManager() {
-    const compute_capacity = (navigator.hardwareConcurrency || 2);
-    const max_workers = (compute_capacity <= 3) && compute_capacity || 3;
+    const max_workers = opts.workers;
     var worker = [];
     var available_workers = [];
 
@@ -281,21 +280,37 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   var f = files[fileOffset++];
   var before;
 
-  if (opts.queuelength === undefined) {
-    opts.queuelength = 6;
+  if (typeof opts.queuelength != 'number' || opts.queuelength <= 0) {
+    opts.queuelength = 12;
   }
 
-  if (opts.chunksperread === undefined) {
-    opts.chunksperread = 1;
+  if (typeof opts.workers != 'number' || opts.workers <= 0) {
+    opts.workers = 1;
+  }
+
+  if (typeof opts.readatlength === 'number' && opts.readatlength > 0) {
+    if (opts.readatlength >= opts.queuelength) {
+      window.alert('Read at queue length value is bad.\n\n' +
+          'You cannot schedule read to occur outside of queue.');
+      return;
+    }
   } else {
+    opts.readatlength = 6;
+  }
+
+  if (typeof opts.chunksperread === 'number' && opts.chunksperread > 0) {
     // is opts.chunksperread a multiple of opts.queuelength?
-  }
-
-  if (opts.readatlength === undefined) {
-    opts.readatlength = 3;
+    if ((opts.queuelength % opts.chunksperread) != 0) {
+      window.alert('chunks/read is not multiple of queuelength');
+      return;
+    }
+    // is opts.chunksperread a multiple of opts.readatlength?
+    if ((opts.readatlength % opts.chunksperread) != 0) {
+      window.alert('chunks/read is not multiple of readatlength');
+      return;
+    }
   } else {
-    // is opts.readatlength < opts.queuelength?
-    // is opts.readatlength a multiple of opts.queuelength?
+    opts.chunksperread = 3;
   }
 
   var ed2k_chunk_processed = function(_file, _progress) {
@@ -320,8 +335,13 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   if (!f)
     return;
 
-  console.log('ed2k_files: nullend mode is ' +
-    (opts.nullend && 'enabled' || 'disabled'));
+  var init_output = 'ed2k_files: nullend mode is ' +
+    (opts.nullend && 'enabled' || 'disabled') + '\n' +
+    '            queuelength=' + opts.queuelength +
+    ' chunks/read=' + opts.chunksperread + ' readatlength=' +opts.readatlength +
+    ' workerlimit=' + opts.workers;
+
+  console.log(init_output);
 
   (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
 
