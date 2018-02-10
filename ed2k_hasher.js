@@ -141,14 +141,15 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (!f)
       return;
 
-    //console.log('chunk availability ' + fakeread_i.length + '/' + chunkQueue);
+    console.log('chunk availability ' + fakeread_i.length + '/(' + chunkQueue +
+        '/' + opts.queuelength + ')');
 
     if (work_manager.workerNotAvailable()) {
       //console.log('  waiting for worker to finish...');
       return;
     }
 
-    if (chunkQueue <= 0 || readArray[tmp_fakeread_i] == null) {
+    if (readArray[tmp_fakeread_i] == null) {
       console.log(' queue starvation, worker(s) available but we have nothing to give them');
       return;
     }
@@ -157,7 +158,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     //console.log('"reading" ' + tmp_fakeread_i);
 
     while (work_manager.workerAvailable() &&
-        (chunkQueue > 0 && readArray[tmp_fakeread_i] != null)) {
+        readArray[tmp_fakeread_i] != null) {
 
       if (using_workers) {
         work_manager.dispatchWork({'index': tmp_fakeread_i,
