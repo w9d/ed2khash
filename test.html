@@ -4,6 +4,10 @@
 <button id="reset" name="reset_files" disabled="true">Reset</button>
 <button id="process" name="process_files" disabled="true">Process</button><hr />
 NULL-end mode: <input id="nullendmode" type="checkbox" checked="true">
+Queue length: <input id="queuelength" type="text" value="12" size="3">
+Chunks per read: <input id="chunksperread" type="text" value="3" size="3">
+Read at queue length: <input id="readatlength" type="text" value="6" size="3">
+Workers: <input id="workerstospawn" type="text" value="1" size="3">
 </div>
 <output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
@@ -89,6 +93,10 @@ NULL-end mode: <input id="nullendmode" type="checkbox" checked="true">
 
     const options = {
       nullend: select_nullendmode.checked,
+      queuelength: parseInt(select_queuelength.value),
+      chunksperread: parseInt(select_chunksperread.value),
+      readatlength: parseInt(select_readatlength.value),
+      workers: parseInt(select_workers.value)
     };
     ed2k_files(files, ed2k_progress, ed2k_file_done, options);
   }
