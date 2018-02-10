@@ -42,7 +42,8 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
 
       console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
-      file.readAsArrayBuffer(f.slice(readOffset, readOffset + read_size));
+      var read_offset_end = limitValue(readOffset + read_size, f.size);
+      file.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
       delay.read[readOffset_i] = Date.now();
 
       let tmp_readOffset_i = readOffset_i;
@@ -61,23 +62,15 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
             fakeread_i.push(real_offset);
             delay.queuewait[real_offset] = Date.now();
           }
-          if (evt.target.result.byteLength < read_size) {
-            // when reading multiple chunks we need to correct the chunkQueue
-            // length at the end since we assumed it'd increase by chunksperread
-            var bytes_remove = read_size - evt.target.result.byteLength;
-            var chunks_remove = Math.floor(bytes_remove / 9728000);
-            if (chunks_remove > 0)
-              chunkQueue -= chunks_remove;
-          }
           // there may be no workers available, so we're dependent on workers
           // calling the work dispatcher for us.
           work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
         }, false
       );
 
+      chunkQueue += Math.ceil((read_offset_end - readOffset) / 9728000);
       readOffset += read_size;
       readOffset_i += opts.chunksperread;
-      chunkQueue += opts.chunksperread;
     }
 
     fill_queue = false;
@@ -247,6 +240,10 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
       available_workers.push(i);
       console.log('workManager: created worker' + i);
     }
+  }
+
+  function limitValue(val, max) {
+    return (val < max) ? val : max;
   }
 
   function arrayBufferToHexDigest(arr) {
