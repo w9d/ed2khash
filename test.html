@@ -2,8 +2,8 @@
 <div style="padding: 10px; border: 1px solid #ccc;">
 <input type="file" id="files" name="_files[]" multiple /><br />
 <button id="reset" name="reset_files" disabled="true">Reset</button>
-<button id="process" name="process_files" disabled="true">Process</button>
-<input id="nullendmode" type="checkbox" checked="true">NULL-end-on-boundary mode</input>
+<button id="process" name="process_files" disabled="true">Process</button><hr />
+NULL-end mode: <input id="nullendmode" type="checkbox" checked="true">
 </div>
 <output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
@@ -11,8 +11,18 @@
 <script src="external/js-md4/src/md4.js"></script>
 <script src="ed2k_hasher.js"></script>
 <script>
+(function() {
   var files = [];
-  var ed2k_text = document.getElementById('ed2k_text');
+  const ed2k_text = document.getElementById('ed2k_text');
+  const btnReset = document.getElementById('reset');
+  const btnProcess = document.getElementById('process');
+  const btnFileSelect = document.getElementById('files');
+  const fileSelectList = document.getElementById('list');
+  const select_nullendmode = document.getElementById('nullendmode');
+  const select_queuelength = document.getElementById('queuelength');
+  const select_chunksperread = document.getElementById('chunksperread');
+  const select_readatlength = document.getElementById('readatlength');
+  const select_workers = document.getElementById('workerstospawn');
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -30,20 +40,20 @@
                   '</li>');
     }
 
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-    document.getElementById('reset').disabled = false;
-    document.getElementById('process').disabled = false;
-    document.getElementById('files').disabled = true;
+    fileSelectList.innerHTML = '<ul>' + output.join('') + '</ul>';
+    btnReset.disabled = false;
+    btnProcess.disabled = false;
+    btnFileSelect.disabled = true;
   }
 
   function resetEverything(evt) {
     files = new Array();
     ed2k_text.value = '';
-    document.getElementById('list').innerHTML = '';
-    document.getElementById('files').value = '';
-    document.getElementById('reset').disabled = true;
-    document.getElementById('process').disabled = true;
-    document.getElementById('files').disabled = false;
+    fileSelectList.innerHTML = '';
+    btnFileSelect.value = '';
+    btnReset.disabled = true;
+    btnProcess.disabled = true;
+    btnFileSelect.disabled = false;
   }
 
   function startProcessingFiles(evt) {
@@ -77,11 +87,14 @@
       output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
     }
 
-    var ed2k_nullend = document.getElementById('nullendmode').checked;
-    ed2k_files(files, ed2k_progress, ed2k_file_done, {nullend: ed2k_nullend});
+    const options = {
+      nullend: select_nullendmode.checked,
+    };
+    ed2k_files(files, ed2k_progress, ed2k_file_done, options);
   }
 
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
-  document.getElementById('reset').addEventListener('click', resetEverything, false);
-  document.getElementById('process').addEventListener('click', startProcessingFiles, false);
+  btnFileSelect.addEventListener('change', handleFileSelect, false);
+  btnReset.addEventListener('click', resetEverything, false);
+  btnProcess.addEventListener('click', startProcessingFiles, false);
+})();
 </script>
