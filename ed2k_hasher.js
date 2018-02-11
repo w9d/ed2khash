@@ -51,17 +51,26 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
         function(evt) {
           delay.read[tmp_readOffset_i] = Date.now() - delay.read[tmp_readOffset_i];
 
-          for (var chunk, off_s = 0, off_e = 9728000, i = 0;
-               ((chunk = evt.target.result.slice(off_s, off_e)) || true) &&
-               off_s < evt.target.result.byteLength;
-               i++, off_s = off_e, off_e += 9728000) {
-            var real_offset = tmp_readOffset_i + i;
-            //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
+          if (evt.target.result.byteLength > 9728000) {
+            // user has selected many-chunk per read mode
+            for (var chunk, off_s = 0, off_e = 9728000, i = 0, real_offset_i;
+                 off_s < evt.target.result.byteLength;
+                 i++, off_s = off_e, off_e += 9728000) {
+              chunk = evt.target.result.slice(off_s, off_e);
+              real_offset_i = tmp_readOffset_i + i;
+              //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
 
-            readArray[real_offset] = chunk;
-            fakeread_i.push(real_offset);
-            delay.queuewait[real_offset] = Date.now();
+              readArray[real_offset_i] = chunk;
+              fakeread_i.push(real_offset_i);
+              delay.queuewait[real_offset_i] = Date.now();
+            }
+          } else {
+            // only processing single chunk, can avoid expensive ArrayBuffer slicing
+            readArray[tmp_readOffset_i] = evt.target.result;
+            fakeread_i.push(tmp_readOffset_i);
+            delay.queuewait[tmp_readOffset_i] = Date.now();
           }
+
           // there may be no workers available, so we're dependent on workers
           // calling the work dispatcher for us.
           work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
