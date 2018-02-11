@@ -301,7 +301,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
     opts.workers = 1;
   }
 
-  if (typeof opts.readatlength === 'number' && opts.readatlength > 0) {
+  if (typeof opts.readatlength === 'number' && opts.readatlength >= 0) {
     if (opts.readatlength >= opts.queuelength) {
       window.alert('Read at queue length value is bad.\n\n' +
           'You cannot schedule read to occur outside of queue.');
