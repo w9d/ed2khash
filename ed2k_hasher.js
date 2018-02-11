@@ -89,12 +89,15 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (chunkQueue <= 0 && readOffset >= f.size &&
         work_manager.notDoingAnything() &&
         fakeread_i[0] == null) {
-      // calculate final hash...
+
       var ed2k_hash = md4.create();
       if ((ed2k_nullend && f.size >= 9728000) ||
         (!ed2k_nullend && f.size > 9728000)) {
+        // if nullend mode selected, stick null on the end
         if ((f.size % 9728000) == 0 && f.size > 0 && ed2k_nullend)
           file_md4.push(md4.arrayBuffer(new ArrayBuffer(0)));
+
+        // calculate final hash...
         for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
           ed2k_hash.update(file_md4[i]);
         }
