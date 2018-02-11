@@ -42,7 +42,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
 
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
-      var read_offset_end = limitValue(readOffset + read_size, f.size);
+      var read_offset_end = Math.min(readOffset + read_size, f.size);
       file.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
       delay.read[readOffset_i] = Date.now();
 
@@ -252,10 +252,6 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
       available_workers.push(i);
       console.log('workManager: created worker' + i);
     }
-  }
-
-  function limitValue(val, max) {
-    return (val < max) ? val : max;
   }
 
   function arrayBufferToHexDigest(arr) {
