@@ -303,30 +303,17 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
     opts.workers = 1;
   }
 
-  if (typeof opts.readatlength === 'number' && opts.readatlength >= 0) {
-    if (opts.readatlength >= opts.queuelength) {
-      window.alert('Read at queue length value is bad.\n\n' +
-          'You cannot schedule read to occur outside of queue.');
-      return;
-    }
-  } else {
-    opts.readatlength = 6;
-  }
-
   if (typeof opts.chunksperread === 'number' && opts.chunksperread > 0) {
     // is opts.chunksperread a multiple of opts.queuelength?
     if ((opts.queuelength % opts.chunksperread) != 0) {
       window.alert('chunks/read is not multiple of queuelength');
       return;
     }
-    // is opts.chunksperread a multiple of opts.readatlength?
-    if ((opts.readatlength % opts.chunksperread) != 0) {
-      window.alert('chunks/read is not multiple of readatlength');
-      return;
-    }
   } else {
     opts.chunksperread = 3;
   }
+
+  opts.readatlength = opts.queuelength - opts.chunksperread;
 
   var ed2k_chunk_processed = function(_file, _progress) {
     //console.log('completeness name=' + _file.name + ' ' + _progress + '%');
