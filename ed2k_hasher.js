@@ -158,8 +158,8 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (!f)
       return;
 
-    console.log('chunk availability ' + fakeread_i.length + '/(' + chunkQueue +
-        '/' + opts.queuelength + ')');
+    //console.log('chunk availability ' + fakeread_i.length + '/(' + chunkQueue +
+    //    '/' + opts.queuelength + ')');
 
     if (work_manager.workerNotAvailable()) {
       //console.log('  waiting for worker to finish...');
@@ -167,7 +167,7 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     }
 
     if (readArray[tmp_fakeread_i] == null) {
-      console.log(' queue starvation, worker(s) available but we have nothing to give them');
+      //console.log(' queue starvation, worker(s) available but we have nothing to give them');
       return;
     }
 
