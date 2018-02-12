@@ -29,6 +29,7 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   const select_sizeinfo = document.getElementById('sizeinfo');
   const select_pfile = document.getElementById('ed2k_progress_file');
   const select_pfiles = document.getElementById('ed2k_progress_files');
+  var terminate = null;
 
   function handleFileSelect(evt) {
     var _files = evt.target.files;
@@ -39,19 +40,24 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
 
     btnReset.disabled = false;
     btnProcess.disabled = false;
-    btnFileSelect.disabled = true;
   }
 
   function resetEverything(evt) {
-    files = new Array();
+    files = [];
     ed2k_text.value = '';
     btnFileSelect.value = '';
     btnReset.disabled = true;
     btnProcess.disabled = true;
     btnFileSelect.disabled = false;
+    nolongerprocess(true,true);
   }
 
   function startProcessingFiles(evt) {
+    if (terminate) {
+      nolongerprocess(true,false);
+      return;
+    }
+
     if (!(files[0])) {
       console.log('process_files: no file to process, this should never happen');
       return;
@@ -74,9 +80,23 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
     var process = ed2k_files(files, options);
     process.onprogress = ed2k_progress;
     process.onfilecomplete = ed2k_file_done;
-    process.onallcomplete = null;
+    process.onallcomplete = (function() {nolongerprocess(false,false)});
+    terminate = process.terminate;
     ed2k_text.value = '';
-    //btnProcess.textContent = 'Stop';
+    btnFileSelect.disabled = true;
+    btnProcess.textContent = 'Stop';
+  }
+
+  function nolongerprocess(really_do_it, progressbar) {
+    if (terminate && really_do_it)
+      terminate();
+    terminate = null;
+    btnFileSelect.disabled = false;
+    btnProcess.textContent = 'Process';
+    if (progressbar) {
+      select_pfile.value = 0;
+      select_pfiles.value = 0;
+    }
   }
 
   function displaySituation() {

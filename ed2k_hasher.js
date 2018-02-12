@@ -289,6 +289,12 @@ var ed2k_files = ed2k_files || (function(files, opts) {
       HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
       HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F];
     }
+
+    return (function() {
+      work_manager.terminateWorkers();
+      f = null;
+      return;
+    });
   }
 
   var fileOffset = 0;
@@ -300,6 +306,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   var total_multiplier = 1 / total_size;
   var total_processed = 0;
   var multipliers = files.map(function(a){return 1/a.size});
+  var current_terminate = null;
   var before;
 
   if (typeof opts.queuelength != 'number' || opts.queuelength <= 0) {
@@ -320,7 +327,20 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     opts.chunksperread = 1;
   }
 
-  var prop = { onprogress: null, onfilecomplete: null, onallcomplete: null };
+  function terminate() {
+    if (current_terminate) {
+      current_terminate();
+      current_terminate = null;
+    }
+    fileOffset = files.length;
+  }
+
+  var prop = {
+    onprogress: null,
+    onfilecomplete: null,
+    onallcomplete: null,
+    terminate: terminate
+  };
 
   opts.readatlength = opts.queuelength - opts.chunksperread;
 
@@ -348,7 +368,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
     if (f) {
       // proceed to next file
-      ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished, opts);
+      current_terminate = ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished,
+        opts);
     } else {
       console.log('process_files: all files processed. took ' +
         (Date.now()-before) + 'ms.');
@@ -371,7 +392,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
 
   before = Date.now();
-  ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished, opts);
+  current_terminate = ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished,
+    opts);
   return prop;
 });
 
