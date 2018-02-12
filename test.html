@@ -7,7 +7,9 @@ NULL-end mode: <input id="nullendmode" type="checkbox" checked="true">
 Queue length: <input id="queuelength" type="text" value="12" size="3">
 Chunks per read: <input id="chunksperread" type="text" value="3" size="3">
 Workers: <input id="workerstospawn" type="text" value="1" size="3">
-= (<span id="sizeinfo"></span>)
+= (<span id="sizeinfo"></span>)<hr />
+<progress id="ed2k_progress_file" style="width:100%"></progress><br />
+<progress id="ed2k_progress_files" style="width:100%"></progress>
 </div>
 <output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
@@ -27,6 +29,8 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   const select_chunksperread = document.getElementById('chunksperread');
   const select_workers = document.getElementById('workerstospawn');
   const select_sizeinfo = document.getElementById('sizeinfo');
+  const select_pfile = document.getElementById('ed2k_progress_file');
+  const select_pfiles = document.getElementById('ed2k_progress_files');
 
   function handleFileSelect(evt) {
     var _files = evt.target.files; // FileList object
@@ -68,24 +72,12 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
       return;
     }
 
-    var regenerate_ed2k_text = function() {
-      ed2k_text.value = '';
-
-      for (var i = 0, f; f = files[i]; i++) {
-        var fsize = output[f.name].size;
-        var fpercent = output[f.name].percent;
-        var fed2khash = output[f.name].hash;
-        ed2k_text.value += '|' + f.name + '|' + fsize + '|' +
-          (fed2khash && fed2khash || '[---'+fpercent+'%---]') + '|\n';
-      }
+    var ed2k_progress = function(_file, _current_file, _total_files) {
+      select_pfile.value = _current_file;
+      select_pfiles.value = _total_files;
     }
-    var ed2k_progress = function(_file, _percent) {
-      output[_file.name].percent = _percent;
-      regenerate_ed2k_text();
-    }
-    var ed2k_file_done = function(_file, _ed2ksum) {
-      output[_file.name].hash = _ed2ksum;
-      regenerate_ed2k_text();
+    var ed2k_file_done = function(f, _ed2ksum) {
+      ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
     }
     for (var i = 0, f; f = files[i]; i++) {
       output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
@@ -98,6 +90,7 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
       workers: parseInt(select_workers.value)
     };
     ed2k_files(files, ed2k_progress, ed2k_file_done, options);
+    ed2k_text.value = '';
   }
 
   function displaySituation() {

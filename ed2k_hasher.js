@@ -14,7 +14,6 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   var file_md4 = new Array();
   var comp_chunks = 0;
   var ed2k_nullend = opts.nullend;
-  var comp_multiplier = 100 / (Math.ceil(f.size / 9728000));
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
   var read_size = opts.chunksperread * 9728000;
   var fill_queue = true;
@@ -186,10 +185,11 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
         delay.queuewait[tmp_fakeread_i] = Date.now() - delay.queuewait[tmp_fakeread_i];
         file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
         setTimeout(areWeThereYet, 0);
+        (func_progress && setTimeout(func_progress, 1, f,
+          (tmp_fakeread_i+1)*9728000)
+        );
       }
-      (func_progress && setTimeout(func_progress, 1, f,
-        Math.round(++comp_chunks*comp_multiplier))
-      );
+
       fakeread_i.shift();
       readArray[tmp_fakeread_i] = null;
       delete readArray[tmp_fakeread_i];
@@ -250,6 +250,10 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
 
         e.data.dirty = null;
         delete e.data.dirty;
+
+        (func_progress && setTimeout(func_progress, 1, f,
+          (e.data.index+1)*9728000)
+        );
         setTimeout(giveWorkersWork, 0); // worker is available. give us a job.
         setTimeout(areWeThereYet, 0); // are we there yet?
         //console.log('workManager: worker' + e.data.workerid +
@@ -292,7 +296,11 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   var opts = opts || {};
   (opts.nullend === undefined) && (opts.nullend = true);
 
-  var f = files[fileOffset++];
+  var f = files[fileOffset];
+  var total_size = files.reduce(function(a,b){return a+b.size}, 0);
+  var total_multiplier = 1 / total_size;
+  var total_processed = 0;
+  var multipliers = files.map(function(a){return 1/a.size});
   var before;
 
   if (typeof opts.queuelength != 'number' || opts.queuelength <= 0) {
@@ -316,12 +324,14 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   opts.readatlength = opts.queuelength - opts.chunksperread;
 
   var ed2k_chunk_processed = function(_file, _progress) {
-    //console.log('completeness name=' + _file.name + ' ' + _progress + '%');
-    (func_progress) && func_progress(_file, _progress);
+    (func_progress) && func_progress(_file,
+        multipliers[fileOffset] * _progress,
+        total_multiplier * (total_processed + _progress));
   }
 
   var ed2k_file_finished = function(_file, _ed2k_hash) {
-    f = files[fileOffset++];
+    total_processed += f.size;
+    f = files[++fileOffset];
     (func_finish) && func_finish(_file, _ed2k_hash);
 
     if (f) {
