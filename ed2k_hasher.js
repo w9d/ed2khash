@@ -304,7 +304,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   var before;
 
   if (typeof opts.queuelength != 'number' || opts.queuelength <= 0) {
-    opts.queuelength = 12;
+    opts.queuelength = 6;
   }
 
   if (typeof opts.workers != 'number' || opts.workers <= 0) {
@@ -318,7 +318,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
       return;
     }
   } else {
-    opts.chunksperread = 3;
+    opts.chunksperread = 1;
   }
 
   opts.readatlength = opts.queuelength - opts.chunksperread;
