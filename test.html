@@ -11,7 +11,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
 <progress id="ed2k_progress_file" style="width:100%"></progress><br />
 <progress id="ed2k_progress_files" style="width:100%"></progress>
 </div>
-<output id="list"></output>
 <textarea id="ed2k_text" readonly="readonly" cols="100" rows="20"></textarea>
 
 <script src="external/js-md4/src/md4.js"></script>
@@ -23,7 +22,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   const btnReset = document.getElementById('reset');
   const btnProcess = document.getElementById('process');
   const btnFileSelect = document.getElementById('files');
-  const fileSelectList = document.getElementById('list');
   const select_nullendmode = document.getElementById('nullendmode');
   const select_queuelength = document.getElementById('queuelength');
   const select_chunksperread = document.getElementById('chunksperread');
@@ -33,22 +31,12 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   const select_pfiles = document.getElementById('ed2k_progress_files');
 
   function handleFileSelect(evt) {
-    var _files = evt.target.files; // FileList object
-    
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    
+    var _files = evt.target.files;
+
     for (var i = 0, f; f = _files[i]; i++) {
       files.push(f);
     }
-    for (var i = 0, f; f = files[i]; i++) {
-      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                  f.size, ' bytes, last modified: ',
-                  f.lastModified ? new Date(f.lastModified).toISOString() : 'n/a',
-                  '</li>');
-    }
 
-    fileSelectList.innerHTML = '<ul>' + output.join('') + '</ul>';
     btnReset.disabled = false;
     btnProcess.disabled = false;
     btnFileSelect.disabled = true;
@@ -57,7 +45,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   function resetEverything(evt) {
     files = new Array();
     ed2k_text.value = '';
-    fileSelectList.innerHTML = '';
     btnFileSelect.value = '';
     btnReset.disabled = true;
     btnProcess.disabled = true;
