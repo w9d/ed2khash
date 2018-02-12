@@ -18,6 +18,47 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
   var delay = {'read': [], 'queuewait': [], 'workerwait': []};
   var read_size = opts.chunksperread * 9728000;
   var fill_queue = true;
+  var hold_off = false;
+
+  const reader = new window.FileReader();
+  reader.addEventListener('loadend',
+    function(evt) {
+      delay.read[readOffset_i] = Date.now() - delay.read[readOffset_i];
+
+      if (evt.target.result.byteLength > 9728000) {
+        // user has selected many-chunk per read mode
+        for (var chunk, off_s = 0, off_e = 9728000, i = 0, real_offset_i;
+             off_s < evt.target.result.byteLength;
+             i++, off_s = off_e, off_e += 9728000) {
+          chunk = evt.target.result.slice(off_s, off_e);
+          real_offset_i = readOffset_i + i;
+          //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
+
+          readArray[real_offset_i] = chunk;
+          fakeread_i.push(real_offset_i);
+          delay.queuewait[real_offset_i] = Date.now();
+        }
+      } else {
+        // only processing single chunk, can avoid expensive ArrayBuffer slicing
+        readArray[readOffset_i] = evt.target.result;
+        fakeread_i.push(readOffset_i);
+        delay.queuewait[readOffset_i] = Date.now();
+      }
+
+      hold_off = false;
+      chunkQueue += Math.ceil(evt.target.result.byteLength / 9728000);
+      readOffset += read_size;
+      readOffset_i += opts.chunksperread;
+      // (chunks just added) do not meet queuelength, request reader execution
+      if (chunkQueue <= opts.readatlength) {
+        giveMeChunks();
+      }
+
+      // there may be no workers available, so we're dependent on workers
+      // calling the work dispatcher for us.
+      work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
+    }, false
+  );
 
   console.log('process_files: starting', f.name);
   setTimeout(giveMeChunks, 0);
@@ -36,50 +77,15 @@ var ed2k_file = ed2k_file || (function(f, func_progress, func_finish, opts) {
     if (chunkQueue <= opts.readatlength)
       fill_queue = true;
 
-    while (chunkQueue < opts.queuelength && fill_queue &&
+    if (chunkQueue < opts.queuelength && fill_queue && !hold_off &&
         readOffset < f.size) {
-      var file = new window.FileReader();
-
       //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
       var read_offset_end = Math.min(readOffset + read_size, f.size);
-      file.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
+      reader.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
       delay.read[readOffset_i] = Date.now();
 
-      let tmp_readOffset_i = readOffset_i;
-      file.addEventListener('loadend',
-        function(evt) {
-          delay.read[tmp_readOffset_i] = Date.now() - delay.read[tmp_readOffset_i];
-
-          if (evt.target.result.byteLength > 9728000) {
-            // user has selected many-chunk per read mode
-            for (var chunk, off_s = 0, off_e = 9728000, i = 0, real_offset_i;
-                 off_s < evt.target.result.byteLength;
-                 i++, off_s = off_e, off_e += 9728000) {
-              chunk = evt.target.result.slice(off_s, off_e);
-              real_offset_i = tmp_readOffset_i + i;
-              //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
-
-              readArray[real_offset_i] = chunk;
-              fakeread_i.push(real_offset_i);
-              delay.queuewait[real_offset_i] = Date.now();
-            }
-          } else {
-            // only processing single chunk, can avoid expensive ArrayBuffer slicing
-            readArray[tmp_readOffset_i] = evt.target.result;
-            fakeread_i.push(tmp_readOffset_i);
-            delay.queuewait[tmp_readOffset_i] = Date.now();
-          }
-
-          // there may be no workers available, so we're dependent on workers
-          // calling the work dispatcher for us.
-          work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
-        }, false
-      );
-
-      chunkQueue += Math.ceil((read_offset_end - readOffset) / 9728000);
-      readOffset += read_size;
-      readOffset_i += opts.chunksperread;
+      hold_off = true;
     }
 
     fill_queue = false;
