@@ -52,8 +52,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
   }
 
   function startProcessingFiles(evt) {
-    var output = [];
-
     if (!(files[0])) {
       console.log('process_files: no file to process, this should never happen');
       return;
@@ -65,9 +63,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
     }
     var ed2k_file_done = function(f, _ed2ksum) {
       ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
-    }
-    for (var i = 0, f; f = files[i]; i++) {
-      output[f.name] = {'percent':0, 'size':f.size, 'hash':null};
     }
 
     const options = {
