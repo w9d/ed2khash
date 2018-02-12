@@ -1,4 +1,4 @@
-var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts) {
+var ed2k_files = ed2k_files || (function(files, opts) {
   "use strict";
 
   function ed2k_file(f, func_progress, func_finish, opts) {
@@ -320,10 +320,12 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
     opts.chunksperread = 1;
   }
 
+  var prop = { onprogress: null, onfilecomplete: null, onallcomplete: null };
+
   opts.readatlength = opts.queuelength - opts.chunksperread;
 
   var ed2k_chunk_processed = function(_file, _progress) {
-    (func_progress) && func_progress(_file,
+    (prop.onprogress) && prop.onprogress(_file,
         multipliers[fileOffset] * _progress,
         total_multiplier * (total_processed + _progress));
   }
@@ -331,7 +333,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
   var ed2k_file_finished = function(_file, _ed2k_hash) {
     total_processed += f.size;
     f = files[++fileOffset];
-    (func_finish) && func_finish(_file, _ed2k_hash);
+    (prop.onfilecomplete) && prop.onfilecomplete(_file, _ed2k_hash);
 
     if (f) {
       // proceed to next file
@@ -339,6 +341,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
     } else {
       console.log('process_files: all files processed. took ' +
         (Date.now()-before) + 'ms.');
+      (prop.onallcomplete) && prop.onallcomplete();
       return;
     }
   }
@@ -358,6 +361,7 @@ var ed2k_files = ed2k_files || (function(files, func_progress, func_finish, opts
 
   before = Date.now();
   ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished, opts);
+  return prop;
 });
 
 if (typeof window !== 'object' && typeof process === 'object' &&

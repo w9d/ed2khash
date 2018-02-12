@@ -71,8 +71,12 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3">
       chunksperread: parseInt(select_chunksperread.value),
       workers: parseInt(select_workers.value)
     };
-    ed2k_files(files, ed2k_progress, ed2k_file_done, options);
+    var process = ed2k_files(files, options);
+    process.onprogress = ed2k_progress;
+    process.onfilecomplete = ed2k_file_done;
+    process.onallcomplete = null;
     ed2k_text.value = '';
+    //btnProcess.textContent = 'Stop';
   }
 
   function displaySituation() {
