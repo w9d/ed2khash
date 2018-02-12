@@ -331,6 +331,17 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   }
 
   var ed2k_file_finished = function(_file, _ed2k_hash) {
+    if (_ed2k_hash.length != 32 ||
+        _ed2k_hash === '00000000000000000000000000000000' ||
+        _ed2k_hash === '31d6cfe0d16ae931b73c59d7e0c089c0' ||
+        typeof _ed2k_hash !== 'string') {
+      // explode if dumb sanity checking fails
+      window.alert('HASH FAILURE (' + _ed2k_hash +
+        ') len=' + _ed2k_hash.length + ' type=' + (typeof _ed2k_hash) + '\n\n' +
+        'Something has gone seriously wrong, you should never see this message.');
+      return;
+    }
+
     total_processed += f.size;
     f = files[++fileOffset];
     (prop.onfilecomplete) && prop.onfilecomplete(_file, _ed2k_hash);
