@@ -45,9 +45,14 @@ var MockFile = (function(bits_noop, name, opts) {
 
 var MockFileReader = (function() {
   var _events = [];
-  var _callbacks = {};
-  
-  this.readAsArrayBuffer = (function (mockfile) {
+  var _callbacks = { 'loadend': []};
+  var prop = {
+    readAsArrayBuffer: readAsArrayBuffer,
+    addEventListener: addEventListener,
+    onloadend: null
+  };
+
+  function readAsArrayBuffer(mockfile) {
     var evt = {};
     evt.target = {};
     evt.target.result = mockfile._genFunc(mockfile._start, mockfile._end, mockfile._orig_size);
@@ -56,18 +61,21 @@ var MockFileReader = (function() {
       for (var i = 0; i < _callbacks['loadend'].length; i++) {
         _callbacks['loadend'][i](evt);
       }
+      (prop.onloadend) && (prop.onloadend(evt));
     });
 
     setTimeout(deferred_callbacks, 20);
-  });
-  this.addEventListener = (function(event, fn, useCapture) {
+  }
+  function addEventListener(event, fn, useCapture) {
     if (_callbacks[event] == undefined) {
       _callbacks[event] = [];
       _events.push(event);
     }
 
     _callbacks[event].push(fn);
-  });
+  }
+
+  return prop;
 });
 
 module.exports = {
