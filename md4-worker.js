@@ -1,4 +1,4 @@
-importScripts('external/js-md4/src/md4.js');
+importScripts('md4.js');
 
 self.onmessage = function(e) {
   var result = md4.arrayBuffer(e.data.data);
