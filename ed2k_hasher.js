@@ -75,7 +75,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return;
 
       if (chunkQueue <= 0 && readOffset >= f.size &&
-          work_manager.notDoingAnything() &&
           fakeread_i[0] == null) {
 
         var ed2k_hash = md4.create();
@@ -127,20 +126,13 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return;
 
       //console.log('chunk availability ' + fakeread_i.length + '/(' + chunkQueue +
-      //    '/' + opts.queuelength + ')');
+      //    '/' + 6 + ')');
 
-      if (work_manager.workerNotAvailable()) {
-        //console.log('  waiting for worker to finish...');
+      if (work_manager.workerNotAvailable()||readArray[tmp_fakeread_i] == null) {
+        // waiting for worker to finish OR queue starvation, worker(s) available
+        // but we have nothing to give them
         return;
       }
-
-      if (readArray[tmp_fakeread_i] == null) {
-        //console.log(' queue starvation, worker(s) available but we have nothing to give them');
-        return;
-      }
-
-      //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
-      //console.log('"reading" ' + tmp_fakeread_i);
 
       while (work_manager.workerAvailable() &&
           readArray[tmp_fakeread_i] != null) {
@@ -153,6 +145,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
           delay.queuewait[tmp_fakeread_i] = Date.now() - delay.queuewait[tmp_fakeread_i];
           file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
           setTimeout(areWeThereYet, 0);
+          chunkQueue -= 1;
           (func_progress && setTimeout(func_progress, 1, f,
             (tmp_fakeread_i+1)*9728000)
           );
@@ -162,7 +155,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         readArray[tmp_fakeread_i] = null;
         delete readArray[tmp_fakeread_i];
         tmp_fakeread_i = fakeread_i[0];
-        chunkQueue -= 1;
       }
 
       // we have consumed some chunks. want more.
@@ -201,10 +193,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return available_workers.length == 0 && using_workers;
       });
 
-      this.notDoingAnything = (function() {
-        return available_workers.length == max_workers || !using_workers;
-      });
-
       if (!using_workers)
         return;
 
@@ -213,6 +201,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         worker[i].onmessage = function(e) {
           file_md4[e.data.index] = e.data.md4;
 
+          chunkQueue -= 1;
           available_workers.push(e.data.workerid);
           delay.workerwait[e.data.index] = Date.now() - delay.workerwait[e.data.index];
 
