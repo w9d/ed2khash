@@ -4,7 +4,6 @@
 <button id="reset" name="reset_files" disabled="true">Reset</button>
 <button id="process" name="process_files" disabled="true">Process</button><br />
 <div id="filestatus"></div><hr />
-NULL-end mode: <input id="nullendmode" type="checkbox" checked="true"><hr />
 <progress id="ed2k_progress_file" style="width:100%"></progress><br />
 <progress id="ed2k_progress_files" style="width:100%"></progress>
 </div>
@@ -19,7 +18,6 @@ NULL-end mode: <input id="nullendmode" type="checkbox" checked="true"><hr />
   const btnReset = document.getElementById('reset');
   const btnProcess = document.getElementById('process');
   const btnFileSelect = document.getElementById('files');
-  const select_nullendmode = document.getElementById('nullendmode');
   const select_status = document.getElementById('filestatus');
   const select_pfile = document.getElementById('ed2k_progress_file');
   const select_pfiles = document.getElementById('ed2k_progress_files');
@@ -74,7 +72,7 @@ NULL-end mode: <input id="nullendmode" type="checkbox" checked="true"><hr />
       ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
     }
 
-    const options = { nullend: select_nullendmode.checked };
+    const options = {};
     var process = ed2k_files(files, options);
     process.onprogress = ed2k_progress;
     process.onfilecomplete = ed2k_file_done;

@@ -14,7 +14,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     var work_manager = new workManager();
 
     var file_md4 = new Array();
-    var ed2k_nullend = opts.nullend;
     var delay = {'read': [], 'queuewait': [], 'workerwait': []};
     var hold_off = false;
 
@@ -55,7 +54,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
       if (!f)
         return;
 
-      if (chunkQueue < 6 && !hold_off && readOffset < f.size) {
+      if (chunkQueue < 6 && !hold_off && readOffset <= f.size) {
         //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
         reader.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
@@ -80,20 +79,14 @@ var ed2k_files = ed2k_files || (function(files, opts) {
           fakeread_i[0] == null) {
 
         var ed2k_hash = md4.create();
-        if ((ed2k_nullend && f.size >= 9728000) ||
-          (!ed2k_nullend && f.size > 9728000)) {
-          // if nullend mode selected, stick null on the end
-          if ((f.size % 9728000) == 0 && f.size > 0 && ed2k_nullend)
-            file_md4.push(md4.arrayBuffer(new ArrayBuffer(0)));
-
+        if (f.size >= 9728000) {
           // calculate final hash...
           for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
             ed2k_hash.update(file_md4[i]);
           }
           ed2k_hash = ed2k_hash.hex();
         } else {
-          // file is less than 9728000 in nullend mode OR
-          // file is less than 9728001 in non-nullend mode
+          // file is less than 9728000
           ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
         }
         for (var i = 0; i < delay.read.length; i++) {
@@ -272,7 +265,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
   var fileOffset = 0;
   var opts = opts || {};
-  (opts.nullend === undefined) && (opts.nullend = true);
 
   var f = files[fileOffset];
   var total_size = files.reduce(function(a,b){return a+b.size}, 0);
@@ -333,11 +325,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
   if (!f)
     return;
-
-  var init_output = 'ed2k_files: nullend mode is ' +
-    (opts.nullend && 'enabled' || 'disabled');
-
-  console.log(init_output);
 
   (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
 
