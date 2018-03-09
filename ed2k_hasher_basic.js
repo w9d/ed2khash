@@ -25,7 +25,7 @@ var ed2k_files = (function(files, opts) {
           (!opts.nullend && file.size > 9728000)) {
         // insert nullend if neccessary
         if ((file.size % 9728000) == 0 && file.size > 0 && opts.nullend)
-          running_hash.update(new ArrayBuffer(0));
+          running_hash.update(md4.arrayBuffer(new ArrayBuffer(0)));
 
         (prop.onfilecomplete) && prop.onfilecomplete(file, running_hash.hex());
       } else {
