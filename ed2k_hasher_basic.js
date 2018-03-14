@@ -4,33 +4,33 @@ var ed2k_files = (function(files, opts) {
   var prop = { onprogress: null, onfilecomplete: null, onallcomplete: null,
     execute: execute };
   var opts = (opts === undefined && {} || opts);
-  (opts.nullend === undefined) && (opts.nullend = true);
 
-  function ed2k_file(file, offset, running_hash) {
+  function ed2k_file(file, offset, md4_list) {
     'use strict';
     if (typeof offset !== 'number') {
       offset = 0;
-      running_hash = md4.create();
+      md4_list = [];
     }
 
     reader.onloadend = function(evt) {
-      running_hash.update(md4.arrayBuffer(evt.target.result));
-      ed2k_file(file, offset+9728000, running_hash);
+      md4_list.push(md4.arrayBuffer(evt.target.result));
+      ed2k_file(file, offset+9728000, md4_list);
     }
 
-    if (offset < file.size) {
+    if (offset <= file.size) {
       reader.readAsArrayBuffer(file.slice(offset, offset+9728000));
     } else {
-      if ((opts.nullend && file.size >= 9728000) ||
-          (!opts.nullend && file.size > 9728000)) {
-        // insert nullend if neccessary
-        if ((file.size % 9728000) == 0 && file.size > 0 && opts.nullend)
-          running_hash.update(md4.arrayBuffer(new ArrayBuffer(0)));
+      var ed2k_hash = md4.create();
+      if (file.size >= 9728000) {
+        // calculate final hash...
+        for (var i = 0, chunkhash; chunkhash = md4_list[i]; i++) {
+          ed2k_hash.update(chunkhash);
+        }
 
-        (prop.onfilecomplete) && prop.onfilecomplete(file, running_hash.hex());
+        (prop.onfilecomplete) && prop.onfilecomplete(file, ed2k_hash.hex());
       } else {
         (prop.onfilecomplete) && prop.onfilecomplete(file,
-            arrayBufferToHexDigest(running_hash));
+            arrayBufferToHexDigest(md4_list[0]));
       }
     }
   }
