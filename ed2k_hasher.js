@@ -14,44 +14,23 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     var work_manager = new workManager();
 
     var file_md4 = new Array();
-    var comp_chunks = 0;
-    var ed2k_nullend = opts.nullend;
     var delay = {'read': [], 'queuewait': [], 'workerwait': []};
-    var read_size = opts.chunksperread * 9728000;
-    var fill_queue = true;
     var hold_off = false;
 
     const reader = new window.FileReader();
     reader.addEventListener('loadend',
       function(evt) {
         delay.read[readOffset_i] = Date.now() - delay.read[readOffset_i];
-
-        if (evt.target.result.byteLength > 9728000) {
-          // user has selected many-chunk per read mode
-          for (var chunk, off_s = 0, off_e = 9728000, i = 0, real_offset_i;
-               off_s < evt.target.result.byteLength;
-               i++, off_s = off_e, off_e += 9728000) {
-            chunk = evt.target.result.slice(off_s, off_e);
-            real_offset_i = readOffset_i + i;
-            //console.log('HIT LOOP', real_offset, i, off_s, off_e, chunk);
-
-            readArray[real_offset_i] = chunk;
-            fakeread_i.push(real_offset_i);
-            delay.queuewait[real_offset_i] = Date.now();
-          }
-        } else {
-          // only processing single chunk, can avoid expensive ArrayBuffer slicing
-          readArray[readOffset_i] = evt.target.result;
-          fakeread_i.push(readOffset_i);
-          delay.queuewait[readOffset_i] = Date.now();
-        }
+        readArray[readOffset_i] = evt.target.result;
+        fakeread_i.push(readOffset_i);
+        delay.queuewait[readOffset_i] = Date.now();
 
         hold_off = false;
-        chunkQueue += Math.ceil(evt.target.result.byteLength / 9728000);
-        readOffset += read_size;
-        readOffset_i += opts.chunksperread;
+        chunkQueue += 1;
+        readOffset += 9728000;
+        readOffset_i += 1;
         // (chunks just added) do not meet queuelength, request reader execution
-        if (chunkQueue <= opts.readatlength) {
+        if (chunkQueue < 6) {
           giveMeChunks();
         }
 
@@ -75,21 +54,14 @@ var ed2k_files = ed2k_files || (function(files, opts) {
       if (!f)
         return;
 
-      if (chunkQueue <= opts.readatlength)
-        fill_queue = true;
-
-      if (chunkQueue < opts.queuelength && fill_queue && !hold_off &&
-          readOffset < f.size) {
+      if (chunkQueue < 6 && !hold_off && readOffset <= f.size) {
         //console.log('process_files: name=', f.name, 'offset=', readOffset, '/', f.size);
 
-        var read_offset_end = Math.min(readOffset + read_size, f.size);
-        reader.readAsArrayBuffer(f.slice(readOffset, read_offset_end));
+        reader.readAsArrayBuffer(f.slice(readOffset, readOffset + 9728000));
         delay.read[readOffset_i] = Date.now();
 
         hold_off = true;
       }
-
-      fill_queue = false;
     }
 
     /* areWeThereYet: Checks to see if we are finished.
@@ -103,24 +75,17 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return;
 
       if (chunkQueue <= 0 && readOffset >= f.size &&
-          work_manager.notDoingAnything() &&
           fakeread_i[0] == null) {
 
         var ed2k_hash = md4.create();
-        if ((ed2k_nullend && f.size >= 9728000) ||
-          (!ed2k_nullend && f.size > 9728000)) {
-          // if nullend mode selected, stick null on the end
-          if ((f.size % 9728000) == 0 && f.size > 0 && ed2k_nullend)
-            file_md4.push(md4.arrayBuffer(new ArrayBuffer(0)));
-
+        if (f.size >= 9728000) {
           // calculate final hash...
           for (var i = 0, chunkhash; chunkhash = file_md4[i]; i++) {
             ed2k_hash.update(file_md4[i]);
           }
           ed2k_hash = ed2k_hash.hex();
         } else {
-          // file is less than 9728000 in nullend mode OR
-          // file is less than 9728001 in non-nullend mode
+          // file is less than 9728000
           ed2k_hash = arrayBufferToHexDigest(file_md4[0]);
         }
         for (var i = 0; i < delay.read.length; i++) {
@@ -161,20 +126,13 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return;
 
       //console.log('chunk availability ' + fakeread_i.length + '/(' + chunkQueue +
-      //    '/' + opts.queuelength + ')');
+      //    '/' + 6 + ')');
 
-      if (work_manager.workerNotAvailable()) {
-        //console.log('  waiting for worker to finish...');
+      if (work_manager.workerNotAvailable()||readArray[tmp_fakeread_i] == null) {
+        // waiting for worker to finish OR queue starvation, worker(s) available
+        // but we have nothing to give them
         return;
       }
-
-      if (readArray[tmp_fakeread_i] == null) {
-        //console.log(' queue starvation, worker(s) available but we have nothing to give them');
-        return;
-      }
-
-      //console.log('actual_queue_length=', chunkQueue, 'array=', readArray);
-      //console.log('"reading" ' + tmp_fakeread_i);
 
       while (work_manager.workerAvailable() &&
           readArray[tmp_fakeread_i] != null) {
@@ -187,6 +145,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
           delay.queuewait[tmp_fakeread_i] = Date.now() - delay.queuewait[tmp_fakeread_i];
           file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
           setTimeout(areWeThereYet, 0);
+          chunkQueue -= 1;
           (func_progress && setTimeout(func_progress, 1, f,
             (tmp_fakeread_i+1)*9728000)
           );
@@ -196,7 +155,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         readArray[tmp_fakeread_i] = null;
         delete readArray[tmp_fakeread_i];
         tmp_fakeread_i = fakeread_i[0];
-        chunkQueue -= 1;
       }
 
       // we have consumed some chunks. want more.
@@ -204,7 +162,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     }
 
     function workManager() {
-      const max_workers = opts.workers;
+      const max_workers = 1;
       var worker = [];
       var available_workers = [];
 
@@ -235,10 +193,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         return available_workers.length == 0 && using_workers;
       });
 
-      this.notDoingAnything = (function() {
-        return available_workers.length == max_workers || !using_workers;
-      });
-
       if (!using_workers)
         return;
 
@@ -247,6 +201,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         worker[i].onmessage = function(e) {
           file_md4[e.data.index] = e.data.md4;
 
+          chunkQueue -= 1;
           available_workers.push(e.data.workerid);
           delay.workerwait[e.data.index] = Date.now() - delay.workerwait[e.data.index];
 
@@ -299,7 +254,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
   var fileOffset = 0;
   var opts = opts || {};
-  (opts.nullend === undefined) && (opts.nullend = true);
 
   var f = files[fileOffset];
   var total_size = files.reduce(function(a,b){return a+b.size}, 0);
@@ -308,24 +262,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   var multipliers = files.map(function(a){return 1/a.size});
   var current_terminate = null;
   var before;
-
-  if (typeof opts.queuelength != 'number' || opts.queuelength <= 0) {
-    opts.queuelength = 6;
-  }
-
-  if (typeof opts.workers != 'number' || opts.workers <= 0) {
-    opts.workers = 1;
-  }
-
-  if (typeof opts.chunksperread === 'number' && opts.chunksperread > 0) {
-    // is opts.chunksperread a multiple of opts.queuelength?
-    if ((opts.queuelength % opts.chunksperread) != 0) {
-      window.alert('chunks/read is not multiple of queuelength');
-      return;
-    }
-  } else {
-    opts.chunksperread = 1;
-  }
 
   function terminate() {
     if (current_terminate) {
@@ -341,8 +277,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     onallcomplete: null,
     terminate: terminate
   };
-
-  opts.readatlength = opts.queuelength - opts.chunksperread;
 
   var ed2k_chunk_processed = function(_file, _progress) {
     (prop.onprogress) && prop.onprogress(_file,
@@ -380,14 +314,6 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
   if (!f)
     return;
-
-  var init_output = 'ed2k_files: nullend mode is ' +
-    (opts.nullend && 'enabled' || 'disabled') + '\n' +
-    '            queuelength=' + opts.queuelength +
-    ' chunks/read=' + opts.chunksperread + ' readatlength=' +opts.readatlength +
-    ' workerlimit=' + opts.workers;
-
-  console.log(init_output);
 
   (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
 

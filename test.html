@@ -4,16 +4,12 @@
 <button id="reset" name="reset_files" disabled="true">Reset</button>
 <button id="process" name="process_files" disabled="true">Process</button><br />
 <div id="filestatus"></div><hr />
-NULL-end mode: <input id="nullendmode" type="checkbox" checked="true">
-Queue length: <input id="queuelength" type="text" value="6" size="3">
-Chunks per read: <input id="chunksperread" type="text" value="1" size="3">
-Workers: <input id="workerstospawn" type="text" value="1" size="3"><hr />
 <progress id="ed2k_progress_file" style="width:100%"></progress><br />
 <progress id="ed2k_progress_files" style="width:100%"></progress>
 </div>
 <textarea id="ed2k_text" readonly="readonly" style="width:100%;resize:vertical" rows="16"></textarea>
 
-<script src="external/js-md4/src/md4.js"></script>
+<script src="md4.js"></script>
 <script src="ed2k_hasher.js"></script>
 <script>
 (function() {
@@ -22,10 +18,6 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3"><hr />
   const btnReset = document.getElementById('reset');
   const btnProcess = document.getElementById('process');
   const btnFileSelect = document.getElementById('files');
-  const select_nullendmode = document.getElementById('nullendmode');
-  const select_queuelength = document.getElementById('queuelength');
-  const select_chunksperread = document.getElementById('chunksperread');
-  const select_workers = document.getElementById('workerstospawn');
   const select_status = document.getElementById('filestatus');
   const select_pfile = document.getElementById('ed2k_progress_file');
   const select_pfiles = document.getElementById('ed2k_progress_files');
@@ -80,12 +72,7 @@ Workers: <input id="workerstospawn" type="text" value="1" size="3"><hr />
       ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
     }
 
-    const options = {
-      nullend: select_nullendmode.checked,
-      queuelength: parseInt(select_queuelength.value),
-      chunksperread: parseInt(select_chunksperread.value),
-      workers: parseInt(select_workers.value)
-    };
+    const options = {};
     var process = ed2k_files(files, options);
     process.onprogress = ed2k_progress;
     process.onfilecomplete = ed2k_file_done;
