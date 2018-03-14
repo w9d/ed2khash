@@ -8,6 +8,8 @@ var ed2k_files = function(files, opts) {
     if (!window.Worker) {
       window.alert('Browser does not support HTML5 Web Workers.\n\nYou cannot' +
         ' use this browser. Sorry.');
+      console.log('Browser does not support HTML5 Web Workers. You cannot' +
+        ' use this browser. Sorry.');
       return;
     }
 
@@ -49,4 +51,18 @@ var ed2k_files = function(files, opts) {
   }
 
   return prop;
+}
+
+if (typeof window !== 'object' && typeof process === 'object' &&
+    process.versions && process.versions.node) {
+  var passMocks = function(_window, _navigator, _md4) {
+    window = _window;
+    navigator = _navigator;
+    md4 = _md4;
+  };
+  ED2K_NODE_ENVIRON = true;
+  module.exports = {
+    ed2k_files: ed2k_files,
+    passMocks: passMocks
+  };
 }
