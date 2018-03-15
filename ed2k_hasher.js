@@ -36,7 +36,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
         // there may be no workers available, so we're dependent on workers
         // calling the work dispatcher for us.
-        work_manager.workerAvailable() && setTimeout(giveWorkersWork, 0);
+        if (work_manager.workerAvailable())
+          setTimeout(giveWorkersWork, 0);
       }, false
     );
 
@@ -103,7 +104,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
         console.log('delays (worker ava): ' + delay.queuewait);
         console.log('delays (worker call):' + delay.workerwait);
 
-        (func_finish && setTimeout(func_finish, 1, f, ed2k_hash));
+        if (func_finish)
+          setTimeout(func_finish, 1, f, ed2k_hash);
 
         work_manager.terminateWorkers();
         f = null;
@@ -146,9 +148,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
           file_md4[tmp_fakeread_i] = md4.arrayBuffer(readArray[tmp_fakeread_i]);
           setTimeout(areWeThereYet, 0);
           chunkQueue -= 1;
-          (func_progress && setTimeout(func_progress, 1, f,
-            (tmp_fakeread_i+1)*9728000)
-          );
+          if (func_progress)
+            setTimeout(func_progress, 1, f,(tmp_fakeread_i+1)*9728000);
         }
 
         fakeread_i.shift();
@@ -208,9 +209,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
           e.data.dirty = null;
           delete e.data.dirty;
 
-          (func_progress && setTimeout(func_progress, 1, f,
-            (e.data.index+1)*9728000)
-          );
+          if (func_progress)
+            setTimeout(func_progress, 1, f,(e.data.index+1)*9728000);
           setTimeout(giveWorkersWork, 0); // worker is available. give us a job.
           setTimeout(areWeThereYet, 0); // are we there yet?
           //console.log('workManager: worker' + e.data.workerid +
@@ -279,8 +279,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   };
 
   var ed2k_chunk_processed = function(_file, _progress) {
-    (prop.onprogress) && prop.onprogress(_file,
-        multipliers[fileOffset] * _progress,
+    if (prop.onprogress)
+      prop.onprogress(_file, multipliers[fileOffset] * _progress,
         total_multiplier * (total_processed + _progress));
   }
 
@@ -298,7 +298,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
 
     total_processed += f.size;
     f = files[++fileOffset];
-    (prop.onfilecomplete) && prop.onfilecomplete(_file, _ed2k_hash);
+    if (prop.onfilecomplete)
+      prop.onfilecomplete(_file, _ed2k_hash);
 
     if (f) {
       // proceed to next file
@@ -307,7 +308,8 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     } else {
       console.log('process_files: all files processed. took ' +
         (Date.now()-before) + 'ms.');
-      (prop.onallcomplete) && prop.onallcomplete();
+      if (prop.onallcomplete)
+        prop.onallcomplete();
       return;
     }
   }
@@ -315,7 +317,10 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   if (!f)
     return;
 
-  (window.Worker) || window.alert('Browser does not support HTML5 Web Workers. Please upgrade.\n\nPerformance and browser interactivity will be affected.');
+  if (!window.Worker) {
+    window.alert('Browser does not support HTML5 Web Workers. Please upgrade.' +
+      '\n\nPerformance and browser interactivity will be affected.');
+  }
 
   before = Date.now();
   current_terminate = ed2k_file(f, ed2k_chunk_processed, ed2k_file_finished,
