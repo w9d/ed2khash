@@ -21,21 +21,24 @@ var ed2k_files = function(files, opts) {
     worker.onmessage = function(e) {
       if (e.data.event === 1) {
         // progress event
-        (prop.onprogress) && prop.onprogress(e.data.file, e.data.file_progress,
+        if (prop.onprogress) {
+          prop.onprogress(e.data.file, e.data.file_progress,
             e.data.files_progress);
-        //console.log('chunk processed ' + Date.now());
+        }
       } else if (e.data.event === 2) {
         // onfilecomplete event
-        (prop.onfilecomplete) && prop.onfilecomplete(e.data.file, e.data.ed2k_hash);
+        if (prop.onfilecomplete)
+          prop.onfilecomplete(e.data.file, e.data.ed2k_hash);
       } else if (e.data.event === 3) {
         // onallcomplete event
-        (prop.onallcomplete) && prop.onallcomplete();
+        if (prop.onallcomplete)
+          prop.onallcomplete();
       } else if (e.data.event === 100) {
         // md4 sub worker error
         worker.terminate();
-        window.alert('Something wrong with HTML5 Sub Web Worker. The error is...\n\n'
-            + e.data.message);
         worker = null;
+        window.alert('Something wrong with HTML5 Sub Web Worker.' +
+          ' The error is...\n\n' + e.data.message);
       } else {
         window.alert('This should never ever happen.');
       }
