@@ -17,7 +17,7 @@
 
 const test = require('tape');
 const com = require('./common.js');
-const md4 = require('../external/js-md4/src/md4.js');
+const md4 = require('../md4.js');
 
 const ed2k = require('../ed2k_hasher.js');
 const fakewindow = { FileReader: com.MockFileReader, alert: (function(noop){}) };
