@@ -9,8 +9,7 @@
 </div>
 <textarea id="ed2k_text" readonly="readonly" style="width:100%;resize:vertical" rows="16"></textarea>
 
-<script src="md4.js"></script>
-<script src="ed2k_hasher.js"></script>
+<script src="ed2k_hasher_basic.js"></script>
 <script>
 (function() {
   var files = [];
@@ -78,6 +77,7 @@
     process.onfilecomplete = ed2k_file_done;
     process.onallcomplete = (function() {nolongerprocess(false,false)});
     terminate = process.terminate;
+    process.execute();
     ed2k_text.value = '';
     btnFileSelect.disabled = true;
     btnProcess.textContent = 'Stop';
