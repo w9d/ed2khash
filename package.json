@@ -1,0 +1,15 @@
+{
+  "name": "ed2k_files",
+  "version": "0.0.1",
+  "description": "Implementation of the ED2K algorithm.",
+  "devDependencies": {
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "grunt": "^1.0.2",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-tape": "^0.1.0"
+  }
+}
