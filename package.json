@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Implementation of the ED2K algorithm.",
   "devDependencies": {
+    "eslint": "^4.18.2",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-node": "^6.0.1",
@@ -10,6 +11,8 @@
     "eslint-plugin-standard": "^3.0.1",
     "grunt": "^1.0.2",
     "grunt-contrib-jshint": "^1.1.0",
-    "grunt-tape": "^0.1.0"
+    "grunt-eslint": "^20.1.0",
+    "grunt-shell": "^2.1.0",
+    "zuul": "^3.11.1"
   }
 }

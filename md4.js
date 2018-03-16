@@ -7,6 +7,7 @@
  * @copyright Yi-Cyuan Chen 2015-2027
  * @license MIT
  */
+/* eslint-disable */
 /*jslint bitwise: true */
 (function () {
   'use strict';
