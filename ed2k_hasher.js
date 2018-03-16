@@ -9,8 +9,7 @@ var ed2k_files = ed2k_files || (function(files, opts) {
     var readOffset_i = 0
     var chunkQueue = 0
     var fakeread_i = []
-    const using_workers = (window.Worker &&
-                           typeof ED2K_NODE_ENVIRON === 'undefined')
+    const using_workers = (!!window.Worker)
     var work_manager = new workManager()
 
     var file_md4 = new Array()
@@ -328,14 +327,13 @@ var ed2k_files = ed2k_files || (function(files, opts) {
   return prop
 })
 
-if (typeof window !== 'object' && typeof process === 'object' &&
-    process.versions && process.versions.node) {
-  var passMocks = function(_window, _navigator, _md4) {
-    window = _window
-    navigator = _navigator
+if (typeof window === 'object' && typeof process === 'object' &&
+    typeof process.versions === 'object' &&
+    typeof process.versions.node === 'undefined') {
+  console.log('we\'re testing')
+  var passMocks = function(_md4) {
     md4 = _md4
   }
-  ED2K_NODE_ENVIRON = true
   module.exports = {
     ed2k_files: ed2k_files,
     passMocks: passMocks

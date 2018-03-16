@@ -56,16 +56,11 @@ var ed2k_files = function(files, opts) {
   return prop
 }
 
-if (typeof window !== 'object' && typeof process === 'object' &&
-    process.versions && process.versions.node) {
-  var passMocks = function(_window, _navigator, _md4) {
-    window = _window
-    navigator = _navigator
-    md4 = _md4
-  }
-  ED2K_NODE_ENVIRON = true
+if (typeof window === 'object' && typeof process === 'object' &&
+    typeof process.versions === 'object' &&
+    typeof process.versions.node === 'undefined') {
+  console.log('we\'re testing')
   module.exports = {
-    ed2k_files: ed2k_files,
-    passMocks: passMocks
+    ed2k_files: ed2k_files
   }
 }
