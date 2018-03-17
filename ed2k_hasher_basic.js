@@ -57,10 +57,12 @@ var ed2k_files = function(files, opts) {
 }
 
 if (typeof window === 'object' && typeof process === 'object' &&
-    typeof process.versions === 'object' &&
-    typeof process.versions.node === 'undefined') {
-  console.log('we\'re testing')
-  module.exports = {
-    ed2k_files: ed2k_files
+    typeof process.versions === 'object') {
+  if (typeof process.versions.node === 'undefined') {
+    /* this looks like a browser in a testing configuration */
+    console.log('we\'re testing')
+    module.exports = {
+      ed2k_files: ed2k_files
+    }
   }
 }
