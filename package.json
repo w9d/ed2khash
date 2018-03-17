@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Implementation of the ED2K algorithm.",
   "devDependencies": {
+    "browserify": "^16.1.1",
     "eslint": "^4.18.2",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
@@ -13,6 +14,7 @@
     "grunt-contrib-jshint": "^1.1.0",
     "grunt-eslint": "^20.1.0",
     "grunt-shell": "^2.1.0",
+    "tape-run": "^3.0.4",
     "zuul": "^3.11.1"
   }
 }
