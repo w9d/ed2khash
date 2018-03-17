@@ -33,7 +33,7 @@ var ed2k_files = function(files, opts) {
       process()
     }
 
-    reader.onloadend = function(evt) {
+    reader.onload = function(evt) {
       chunks[offset_i] = evt.target.result
       chunks_i.push(offset_i)
       busy_read = false
@@ -45,6 +45,12 @@ var ed2k_files = function(files, opts) {
           total_multiplier * (total_processed + offset))
       }
       process()
+    }
+    reader.onerror = function(evt) {
+      die = true
+      console.error('read error', evt.target)
+      window.alert('Something wrong with HTML5 FileReader.' +
+      ' The error is...\n\n' + evt.target.error)
     }
 
     function process() {
