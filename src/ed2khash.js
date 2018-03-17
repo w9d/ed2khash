@@ -72,21 +72,22 @@ var ed2k_files = function(files, opts) {
         queue += 1
         reader.readAsArrayBuffer(file.slice(offset, offset+9728000))
       } else if (!busy_read && !busy_work && queue === 0) {
-        if (!prop.onfilecomplete)
-          return
-
         if (file.size >= 9728000) {
           // calculate final hash...
           md4_worker.onmessage = function(e) {
-            setTimeout(prop.onfilecomplete, 1, file,
-              arrayBufferToHexDigest(e.data.ed2khash))
+            if (prop.onfilecomplete) {
+              setTimeout(prop.onfilecomplete, 1, file,
+                arrayBufferToHexDigest(e.data.ed2khash))
+            }
             processNextFile()
           }
           md4_worker.postMessage({finish: true, md4_list: md4_list})
           die = true
         } else {
-          setTimeout(prop.onfilecomplete, 1, file,
-            arrayBufferToHexDigest(md4_list[0]))
+          if (prop.onfilecomplete) {
+            setTimeout(prop.onfilecomplete, 1, file,
+              arrayBufferToHexDigest(md4_list[0]))
+          }
           processNextFile()
         }
         total_processed += file.size
