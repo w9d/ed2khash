@@ -5,6 +5,8 @@ var ed2k_files = function(files, opts) {
     execute: execute, terminate: terminate }
 
   function execute() {
+    var before = Date.now()
+
     if (!window.Worker) {
       window.alert('Browser does not support HTML5 Web Workers.\n\nYou cannot' +
         ' use this browser. Sorry.')
@@ -31,6 +33,7 @@ var ed2k_files = function(files, opts) {
           prop.onfilecomplete(e.data.file, e.data.ed2k_hash)
       } else if (e.data.event === 3) {
         // onallcomplete event
+        console.log('all files processed. took ' + (Date.now() - before) + 'ms')
         if (prop.onallcomplete)
           prop.onallcomplete()
       } else if (e.data.event === 100) {
