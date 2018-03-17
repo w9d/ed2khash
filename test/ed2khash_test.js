@@ -18,9 +18,7 @@
 const test = require('tape')
 const com = require('./common.js')
 
-const md4 = require('../md4.js')
-const ed2k = require('../ed2k_hasher.js')
-ed2k.passMocks(md4)
+const ed2k = require('../ed2khash.js')
 
 test('single file single chunk-1 zeros with nullend', function(t) {
     t.plan(1)
@@ -28,7 +26,9 @@ test('single file single chunk-1 zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, 'ac44b93fc9aff773ab0005c911f8396f')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
 
 test('single file single chunk zeros with nullend', function(t) {
@@ -37,7 +37,9 @@ test('single file single chunk zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, 'fc21d9af828f92a8df64beac3357425d')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
 
 test('single file single chunk+1 zeros with nullend', function(t) {
@@ -46,7 +48,9 @@ test('single file single chunk+1 zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, '06329e9dba1373512c06386fe29e3c65')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
 
 test('single file two chunks-1 zeros with nullend', function(t) {
@@ -55,7 +59,9 @@ test('single file two chunks-1 zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, 'a4aed104a077de7e4210e7f5b131fe25')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
 
 test('single file two chunks zeros with nullend', function(t) {
@@ -64,7 +70,9 @@ test('single file two chunks zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, '114b21c63a74b6ca922291a11177dd5c')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
 
 test('single file two chunks+1 zeros with nullend', function(t) {
@@ -73,5 +81,7 @@ test('single file two chunks+1 zeros with nullend', function(t) {
     var c = function(_file, _hash) {
       t.equal(_hash, 'e57f824d28f69fe90864e17673668457')
     }
-    ed2k.ed2k_files([test]).onfilecomplete = c
+    var a = ed2k.ed2k_files([test])
+    a.onfilecomplete = c
+    a.execute()
 })
