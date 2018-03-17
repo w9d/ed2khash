@@ -75,15 +75,16 @@ var ed2k_files = function(files, opts) {
           md4_worker.onmessage = function(e) {
             setTimeout(prop.onfilecomplete, 1, file,
               arrayBufferToHexDigest(e.data.ed2khash))
+            processNextFile()
           }
           md4_worker.postMessage({finish: true, md4_list: md4_list})
           die = true
         } else {
           setTimeout(prop.onfilecomplete, 1, file,
             arrayBufferToHexDigest(md4_list[0]))
+          processNextFile()
         }
         total_processed += file.size
-        processNextFile()
       }
     }
 
