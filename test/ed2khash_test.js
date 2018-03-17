@@ -20,7 +20,7 @@ const com = require('./common.js')
 
 const ed2k = require('../src/ed2khash.js')
 
-test('single file single chunk-1 zeros with nullend', function(t) {
+test('1 file 1 chunk-1 zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 9727999)
     var c = function(_file, _hash) {
@@ -31,7 +31,7 @@ test('single file single chunk-1 zeros with nullend', function(t) {
     a.execute()
 })
 
-test('single file single chunk zeros with nullend', function(t) {
+test('1 file 1 chunk zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 9728000)
     var c = function(_file, _hash) {
@@ -42,7 +42,7 @@ test('single file single chunk zeros with nullend', function(t) {
     a.execute()
 })
 
-test('single file single chunk+1 zeros with nullend', function(t) {
+test('1 file 1 chunk+1 zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 9728001)
     var c = function(_file, _hash) {
@@ -53,7 +53,7 @@ test('single file single chunk+1 zeros with nullend', function(t) {
     a.execute()
 })
 
-test('single file two chunks-1 zeros with nullend', function(t) {
+test('1 file 2 chunks-1 zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 19455999)
     var c = function(_file, _hash) {
@@ -64,7 +64,7 @@ test('single file two chunks-1 zeros with nullend', function(t) {
     a.execute()
 })
 
-test('single file two chunks zeros with nullend', function(t) {
+test('1 file 2 chunks zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 19456000)
     var c = function(_file, _hash) {
@@ -75,7 +75,7 @@ test('single file two chunks zeros with nullend', function(t) {
     a.execute()
 })
 
-test('single file two chunks+1 zeros with nullend', function(t) {
+test('1 file 2 chunks+1 zeros', function(t) {
     t.plan(1)
     var test = new com.genFile(com.genZero, 19456001)
     var c = function(_file, _hash) {
