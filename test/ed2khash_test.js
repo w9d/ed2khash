@@ -18,7 +18,7 @@
 const test = require('tape')
 const com = require('./common.js')
 
-const ed2k = require('../ed2khash.js')
+const ed2k = require('../src/ed2khash.js')
 
 test('single file single chunk-1 zeros with nullend', function(t) {
     t.plan(1)

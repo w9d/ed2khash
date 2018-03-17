@@ -14,7 +14,8 @@ grunt.initConfig({
       command: '/usr/bin/firefox "http://localhost:8081" & ./node_modules/browserify/bin/cmd.js ed2khash_test.js|./node_modules/tape-run/bin/run.js --wait 60 --static . --port 8081'
     },
     zuullocal: {
-      command: 'zuul --ui tape --local 9000 ./test/ed2khash_test.js'
+      command: 'zuul --ui tape --local 9000 ../test/ed2khash_test.js',
+      options: { execOptions: { cwd: 'src' } }
     }
   }
 })
