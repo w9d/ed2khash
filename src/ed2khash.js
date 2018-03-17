@@ -8,9 +8,9 @@ var ed2k_files = function(files, opts) {
 
   md4_worker.onerror = function(e) {
     die = true
+    console.error('web worker error', e)
     window.alert('Something wrong with HTML5 Web Worker.' +
-      ' The error is...\n\n', e.message)
-    console.log('web worker error', e)
+      ' The error is...\n\n' + e.message)
   }
 
   var total_size = files.reduce(function(a,b){return a+b.size}, 0)
