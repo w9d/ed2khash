@@ -56,8 +56,8 @@ var ed2k_files = function(files, opts) {
     function process() {
       if (die)
         return
-      console.log('status: '+offset+'/'+file.size+' read='+busy_read+
-          ' work='+busy_work+' queue='+queue)
+      //console.log('status: '+offset+'/'+file.size+' read='+busy_read+
+      //    ' work='+busy_work+' queue='+queue)
 
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
