@@ -63,8 +63,7 @@ var ed2k_files = function(files, opts) {
         var index = chunks_i.shift()
         var chunk = chunks[index]
         busy_work = true
-        md4_worker.postMessage({workerid:1, index: index, data: chunk},
-            [chunk])
+        md4_worker.postMessage({index: index, data: chunk}, [chunk])
         chunks[index] = null
       }
 
