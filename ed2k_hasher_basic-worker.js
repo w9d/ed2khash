@@ -55,14 +55,13 @@ self.onmessage = function(e) {
         queue += 1
         reader.readAsArrayBuffer(file.slice(offset, offset+9728000))
       } else if (!busy_read && !busy_work && queue === 0 && from_md4_worker) {
-        var ed2k_hash = md4.create()
         if (file.size >= 9728000) {
           // calculate final hash...
-          for (var i = 0, chunkhash; chunkhash = md4_list[i]; i++) {
-            ed2k_hash.update(chunkhash)
+          md4_worker.onmessage = function(e) {
+            postMessage({event: 2, file: file,
+              ed2k_hash: arrayBufferToHexDigest(e.data.ed2khash)})
           }
-
-          postMessage({event: 2, file: file, ed2k_hash: ed2k_hash.hex()})
+          md4_worker.postMessage({finish: true, md4_list: md4_list})
         } else {
           postMessage({event: 2, file: file,
             ed2k_hash: arrayBufferToHexDigest(md4_list[0])})
