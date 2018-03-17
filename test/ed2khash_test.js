@@ -22,66 +22,155 @@ const ed2k = require('../src/ed2khash.js')
 
 test('1 file 1 chunk-1 zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 9727999)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 9727999)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, 'ac44b93fc9aff773ab0005c911f8396f')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
     a.execute()
 })
 
 test('1 file 1 chunk zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 9728000)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 9728000)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, 'fc21d9af828f92a8df64beac3357425d')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
     a.execute()
 })
 
 test('1 file 1 chunk+1 zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 9728001)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 9728001)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, '06329e9dba1373512c06386fe29e3c65')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
     a.execute()
 })
 
 test('1 file 2 chunks-1 zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 19455999)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 19455999)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, 'a4aed104a077de7e4210e7f5b131fe25')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
     a.execute()
 })
 
 test('1 file 2 chunks zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 19456000)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 19456000)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, '114b21c63a74b6ca922291a11177dd5c')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
     a.execute()
 })
 
 test('1 file 2 chunks+1 zeros', function(t) {
     t.plan(1)
-    var test = new com.genFile(com.genZero, 19456001)
-    var c = function(_file, _hash) {
+    var f = new com.genFile(com.genZero, 19456001)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
       t.equal(_hash, 'e57f824d28f69fe90864e17673668457')
     }
-    var a = ed2k.ed2k_files([test])
-    a.onfilecomplete = c
+    a.execute()
+})
+
+test('1 file 1 chunk-1 random', function(t) {
+    t.plan(1)
+    var f = com.genFile(com.genRand, 9727999)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
+      t.equal(_hash, '4b3edce7128daee5acf803ef4b14004d')
+    }
+    a.execute()
+})
+
+test('1 file 1 chunk random', function(t) {
+    t.plan(1)
+    var f = com.genFile(com.genRand, 9728000)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
+      t.equal(_hash, 'df1ad062dc5b2b213288f722c0d683b9')
+    }
+    a.execute()
+})
+
+test('1 file 1 chunk+1 random', function(t) {
+    t.plan(1)
+    var f = com.genFile(com.genRand, 9728001)
+    var a = ed2k.ed2k_files([f])
+    a.onfilecomplete = function(_file, _hash) {
+      t.equal(_hash, '74c23c0baeef195a01c5b28aa19b48de')
+    }
+    a.execute()
+})
+
+test('onprogress callback 2', function(t) {
+    t.plan(1)
+    var count = 0,
+        f = com.genFile(com.genRand, 19455999)
+    var a = ed2k.ed2k_files([f])
+    a.onprogress = function(a, b, c) { count += 1 }
+    setTimeout(function() {
+      if (count !== 2)
+        t.fail('got ' + count + ' callbacks instead of 2')
+      else
+        t.pass('correct')
+    }, 2000)
+    a.execute()
+})
+
+test('onprogress callback 3', function(t) {
+    t.plan(1)
+    var count = 0,
+        f = com.genFile(com.genRand, 19456000)
+    var a = ed2k.ed2k_files([f])
+    a.onprogress = function(a, b, c) { count += 1 }
+    setTimeout(function() {
+      if (count !== 3)
+        t.fail('got ' + count + ' callbacks instead of 3')
+      else
+        t.pass('correct')
+    }, 2000)
+    a.execute()
+})
+
+test('onallcomplete callback 2 files', function(t) {
+    t.plan(1)
+    var count = 0,
+        f1 = com.genFile(com.genRand, 20000000, 'test1.mkv'),
+        f2 = com.genFile(com.genZero, 9000000, 'test2.mp4')
+    var a = ed2k.ed2k_files([f1, f2])
+    a.onfilecomplete = function(_file, _hash) {}
+    a.onallcomplete = function() { count += 1 }
+    setTimeout(function() {
+      if (count !== 1)
+        t.fail('got ' + count + ' callbacks instead of 1')
+      else
+        t.pass('got 1 callback as expected')
+    }, 5000)
+    a.execute()
+})
+
+test('terminate script', function(t) {
+    t.plan(1)
+    var count = 0,
+        f1 = com.genFile(com.genZero, 48640000)
+    var a = ed2k.ed2k_files([f1])
+    a.onprogress = function(_file, _progress, _total_progress) {
+      if (++count === 2)
+        a.terminate()
+    }
+    setTimeout(function() {
+      if (count !== 3)
+        t.fail('got ' + count + ' callbacks instead of 3')
+      else
+        t.pass('correct')
+    }, 2000)
     a.execute()
 })
