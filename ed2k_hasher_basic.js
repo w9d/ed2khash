@@ -30,7 +30,7 @@ var ed2k_files = function(files, opts) {
       e.data.dirty = null
       delete e.data.dirty
       queue -= 1
-      process(true)
+      process()
     }
 
     reader.onloadend = function(evt) {
@@ -44,14 +44,14 @@ var ed2k_files = function(files, opts) {
           multipliers[fileoffset] * offset,
           total_multiplier * (total_processed + offset))
       }
-      process(false)
+      process()
     }
 
-    function process(from_md4_worker) {
+    function process() {
       if (die)
         return
       console.log('status: '+offset+'/'+file.size+' read='+busy_read+
-          ' work='+busy_work+' from_md4='+from_md4_worker+' queue='+queue)
+          ' work='+busy_work+' queue='+queue)
 
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
@@ -66,7 +66,7 @@ var ed2k_files = function(files, opts) {
         busy_read = true
         queue += 1
         reader.readAsArrayBuffer(file.slice(offset, offset+9728000))
-      } else if (!busy_read && !busy_work && queue === 0 && from_md4_worker) {
+      } else if (!busy_read && !busy_work && queue === 0) {
         if (!prop.onfilecomplete)
           return
 
@@ -88,7 +88,7 @@ var ed2k_files = function(files, opts) {
       }
     }
 
-    process(false)
+    process()
   }
 
   function arrayBufferToHexDigest(arr) {
