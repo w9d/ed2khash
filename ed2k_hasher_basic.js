@@ -3,7 +3,7 @@ var ed2k_files = function(files, opts) {
   var prop = { onprogress: null, onfilecomplete: null, onallcomplete: null,
     execute: execute, terminate: terminate }
 
-  var reader = new FileReader()
+  var reader = new FileReader(), before = null
   var fileoffset = -1, md4_worker = new Worker('md4-worker.js'), die = false
 
   md4_worker.onerror = function(e) {
@@ -119,12 +119,14 @@ var ed2k_files = function(files, opts) {
     if (files[++fileoffset]) {
       ed2k_file(files[fileoffset])
     } else {
+      console.log('all files complete. took ' + (Date.now() - before) + 'ms')
       if (prop.onallcomplete)
         setTimeout(prop.onallcomplete, 1)
     }
   }
 
   function execute() {
+    before = Date.now()
     processNextFile()
   }
 
