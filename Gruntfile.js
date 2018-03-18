@@ -4,10 +4,10 @@ module.exports = function(grunt) {
 
 grunt.initConfig({
   jshint: {
-    files: ['Gruntfile.js', 'test/*.js', '*.js']
+    files: ['Gruntfile.js', 'test/*.js', 'src/*.js']
   },
   eslint: {
-    target: ['Gruntfile.js', 'test/*.js', '*.js']
+    target: ['Gruntfile.js', 'test/*.js', 'src/*.js']
   },
   shell: {
     taperun: {
