@@ -9,7 +9,24 @@
  */
 /* eslint-disable */
 /*jslint bitwise: true */
-(function () {
+/**
+ * @method md4
+ * @description MD4 hash function, export to global in browsers.
+ * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
+ * @returns {String} md4 hashes
+ * @example
+ * md4(''); // 31d6cfe0d16ae931b73c59d7e0c089c0
+ * md4('The quick brown fox jumps over the lazy dog'); // 1bee69a46ba811185c194762abaeae90
+ * md4('The quick brown fox jumps over the lazy dog.'); // 2812c6c7136898c51f6f6739ad08750e
+ *
+ * // It also supports UTF-8 encoding
+ * md4('中文'); // 223088bf7bd45a16436b15360c5fc5a0
+ *
+ * // It also supports byte `Array`, `Uint8Array`, `ArrayBuffer`
+ * md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0
+ * md4(new Uint8Array([])); // 31d6cfe0d16ae931b73c59d7e0c089c0
+ */
+var md4 = (function () {
   'use strict';
 
   var WINDOW = typeof window === 'object';
@@ -18,14 +35,12 @@
     WINDOW = false;
   }
   var WEB_WORKER = !WINDOW && typeof self === 'object';
-  var NODE_JS = !root.JS_MD4_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
-  if (NODE_JS) {
-    root = global;
-  } else if (WEB_WORKER) {
+  var NODE_JS = false;
+  if (WEB_WORKER) {
     root = self;
   }
-  var COMMON_JS = !root.JS_MD4_NO_COMMON_JS && typeof module === 'object' && module.exports;
-  var AMD = typeof define === 'function' && define.amd;
+  var COMMON_JS = false;
+  var AMD = false;
   var ARRAY_BUFFER = !root.JS_MD4_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
@@ -105,9 +120,6 @@
    */
   var createMethod = function () {
     var method = createOutputMethod('hex');
-    if (NODE_JS) {
-      method = nodeWrap(method);
-    }
     method.create = function () {
       return new Md4();
     };
@@ -119,22 +131,6 @@
       method[type] = createOutputMethod(type);
     }
     return method;
-  };
-
-  var nodeWrap = function (method) {
-    var crypto = require('crypto');
-    var Buffer = require('buffer').Buffer;
-    var nodeMethod = function (message) {
-      if (typeof message === 'string') {
-        return crypto.createHash('md4').update(message, 'utf8').digest('hex');
-      } else if (ARRAY_BUFFER && message instanceof ArrayBuffer) {
-        message = new Uint8Array(message);
-      } else if (message.length === undefined) {
-        return method(message);
-      }
-      return crypto.createHash('md4').update(new Buffer(message)).digest('hex');
-    };
-    return nodeMethod;
   };
 
   /**
@@ -550,33 +546,5 @@
    */
   Md4.prototype.buffer = Md4.prototype.arrayBuffer;
 
-  var exports = createMethod();
-
-  if (COMMON_JS) {
-    module.exports = exports;
-  } else {
-    /**
-     * @method md4
-     * @description MD4 hash function, export to global in browsers.
-     * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-     * @returns {String} md4 hashes
-     * @example
-     * md4(''); // 31d6cfe0d16ae931b73c59d7e0c089c0
-     * md4('The quick brown fox jumps over the lazy dog'); // 1bee69a46ba811185c194762abaeae90
-     * md4('The quick brown fox jumps over the lazy dog.'); // 2812c6c7136898c51f6f6739ad08750e
-     *
-     * // It also supports UTF-8 encoding
-     * md4('中文'); // 223088bf7bd45a16436b15360c5fc5a0
-     *
-     * // It also supports byte `Array`, `Uint8Array`, `ArrayBuffer`
-     * md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0
-     * md4(new Uint8Array([])); // 31d6cfe0d16ae931b73c59d7e0c089c0
-     */
-    root.md4 = exports;
-    if (AMD) {
-      define(function () {
-        return exports;
-      });
-    }
-  }
+  return createMethod();
 })();
