@@ -1,7 +1,7 @@
 var ed2k_files = function(files, opts) {
 'use strict'
-  var prop = { onprogress: null, onfilecomplete: null, onallcomplete: null,
-    execute: execute, terminate: terminate }
+  var prop = { 'onprogress': null, 'onfilecomplete': null,
+    'onallcomplete': null, 'execute': execute, 'terminate': terminate }
 
   var reader = new FileReader(), before = null
   var fileoffset = -1, md4_worker = new Worker('md4-worker.js'), die = false
@@ -25,10 +25,9 @@ var ed2k_files = function(files, opts) {
     die = false
 
     md4_worker.onmessage = function(e) {
-      md4_list[e.data.index] = e.data.md4
+      md4_list[e.data['i']] = e.data['h']
       busy_work = false
-      e.data.dirty = null
-      delete e.data.dirty
+      e.data['d'] = null
       queue -= 1
       process()
     }
@@ -39,8 +38,8 @@ var ed2k_files = function(files, opts) {
       busy_read = false
       offset += 9728000
       offset_i += 1
-      if (prop.onprogress) {
-        setTimeout(prop.onprogress, 1, file,
+      if (prop['onprogress']) {
+        setTimeout(prop['onprogress'], 1, file,
           multipliers[fileoffset] * offset,
           total_multiplier * (total_processed + offset))
       }
@@ -63,7 +62,7 @@ var ed2k_files = function(files, opts) {
         var index = chunks_i.shift()
         var chunk = chunks[index]
         busy_work = true
-        md4_worker.postMessage({index: index, data: chunk}, [chunk])
+        md4_worker.postMessage({'i': index, 'd': chunk}, [chunk])
         chunks[index] = null
       }
 
@@ -75,17 +74,17 @@ var ed2k_files = function(files, opts) {
         if (file.size >= 9728000) {
           // calculate final hash...
           md4_worker.onmessage = function(e) {
-            if (prop.onfilecomplete) {
-              setTimeout(prop.onfilecomplete, 1, file,
-                arrayBufferToHexDigest(e.data.ed2khash))
+            if (prop['onfilecomplete']) {
+              setTimeout(prop['onfilecomplete'], 1, file,
+                arrayBufferToHexDigest(e.data['h']))
             }
             processNextFile()
           }
-          md4_worker.postMessage({finish: true, md4_list: md4_list})
+          md4_worker.postMessage({'f': true, 'hl': md4_list})
           die = true
         } else {
-          if (prop.onfilecomplete) {
-            setTimeout(prop.onfilecomplete, 1, file,
+          if (prop['onfilecomplete']) {
+            setTimeout(prop['onfilecomplete'], 1, file,
               arrayBufferToHexDigest(md4_list[0]))
           }
           processNextFile()
@@ -126,8 +125,8 @@ var ed2k_files = function(files, opts) {
       ed2k_file(files[fileoffset])
     } else {
       console.log('all files complete. took ' + (Date.now() - before) + 'ms')
-      if (prop.onallcomplete)
-        setTimeout(prop.onallcomplete, 1)
+      if (prop['onallcomplete'])
+        setTimeout(prop['onallcomplete'], 1)
     }
   }
 
