@@ -143,8 +143,8 @@ test('onprogress callback 3', function(t) {
 test('onallcomplete callback 2 files', function(t) {
     t.plan(1)
     var count = 0,
-        f1 = com.genFile(com.genRand, 20000000, 'test1.mkv'),
-        f2 = com.genFile(com.genZero, 9000000, 'test2.mp4')
+        f1 = com.genFile(com.genRand, 20000000, {name: 'test1.mkv'}),
+        f2 = com.genFile(com.genZero, 9000000, {name:'test2.mp4'})
     var a = ed2k.ed2k_files([f1, f2])
     a.onfilecomplete = function(_file, _hash) {}
     a.onallcomplete = function() { count += 1 }
@@ -153,7 +153,7 @@ test('onallcomplete callback 2 files', function(t) {
         t.fail('got ' + count + ' callbacks instead of 1')
       else
         t.pass('got 1 callback as expected')
-    }, 5000)
+    }, 3000)
     a.execute()
 })
 
@@ -172,5 +172,35 @@ test('terminate script', function(t) {
       else
         t.pass('correct')
     }, 2000)
+    a.execute()
+})
+
+test('standard run s-b-s', function(t) {
+    t.plan(2)
+    var count = 0, good = 0, finish = 0,
+      f = [com.genFile(com.genRand, 14592123, {name: 't1.mp4', seed: 1291769473}),
+         com.genFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
+         com.genFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})],
+        ha = ['25250410dc9672f15e5f37c96f2969b9',
+              '3dfca2c114476e2c3a993007b3568f1b',
+              '4e020dfd7f784b490b23ba85fadbc9f3',
+              'NEVERHAPPEN']
+    var a = ed2k.ed2k_files(f)
+    a.onfilecomplete = function(_file, _ed2khash) {
+      if (ha[count] === _ed2khash && f[count].name === _file.name)
+        good++
+      count++
+    }
+    a.onallcomplete = function() { finish += 1 }
+    setTimeout(function() {
+      if (good === 3)
+        t.pass('good files')
+      else
+        t.fail('got ' + good + ' successful files processed instead of 3')
+      if (finish === 1)
+        t.pass('good finish')
+      else
+        t.fail('got ' + finish + ' finishes instead of 1')
+    }, 6000)
     a.execute()
 })

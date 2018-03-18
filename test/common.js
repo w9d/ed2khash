@@ -7,9 +7,9 @@ var genZero = function(size) {
   return buffer.buffer
 }
 
-var genRand = function(size) {
+var genRand = function(size, seed) {
   var buffer = new Int8Array(size)
-  var xors7 = xorshift7(1963272565), data
+  var xors7 = xorshift7(seed || 1963272565), data
 
   for(var start = 0; start < size; start += 4) {
     data = xors7.int32()
@@ -24,8 +24,10 @@ var genRand = function(size) {
   return buffer.buffer
 }
 
-var genFile = function(generator, size, name) {
-  return new File([generator(size)], name || 'test.mp4', {type: 'video/mp4'})
+var genFile = function(generator, size, options) {
+  var opt = options || {}
+  return new File([generator(size, opt.seed)], opt.name || 'test.mp4',
+    {type: 'video/mp4'})
 }
 
 module.exports = {
