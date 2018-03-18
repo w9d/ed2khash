@@ -45,7 +45,6 @@ var md4 = (function () {
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
   var SHIFT = [0, 8, 16, 24];
-  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'buffer', 'arrayBuffer'];
 
   var blocks = [], buffer8;
   if (ARRAY_BUFFER) {
@@ -92,12 +91,6 @@ var md4 = (function () {
    * @example
    * md4.buffer('The quick brown fox jumps over the lazy dog');
    */
-  var createOutputMethod = function (outputType) {
-    return function(message) {
-      return new Md4(true).update(message)[outputType]();
-    }
-  };
-
   /**
    * @method create
    * @memberof md4
@@ -119,17 +112,17 @@ var md4 = (function () {
    * hash.update('The quick brown fox jumps over the lazy dog');
    */
   var createMethod = function () {
-    var method = createOutputMethod('hex');
+    var method = (message) => { return new Md4(true).update(message).hex() }
     method.create = function () {
       return new Md4();
     };
     method.update = function (message) {
       return method.create().update(message);
     };
-    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
-      var type = OUTPUT_TYPES[i];
-      method[type] = createOutputMethod(type);
-    }
+    method.hex = (message) => { return new Md4(true).update(message).hex() }
+    method.array = (message) => { return new Md4(true).update(message).array() }
+    method.digest = (message) => { return new Md4(true).update(message).digest() }
+    method.arrayBuffer = (message) => { return new Md4(true).update(message).arrayBuffer() }
     return method;
   };
 
