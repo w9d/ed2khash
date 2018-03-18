@@ -142,9 +142,16 @@ var ed2k_files = function(files, opts) {
   return prop
 }
 
-if (typeof window === 'object' && typeof process === 'object' &&
-    typeof process.versions === 'object') {
-  if (typeof process.versions.node === 'undefined') {
+window['ed2k_files'] = ed2k_files
+
+/*** @define {boolean} */
+var RELEASE = false;
+var process = process || {}, module = module || {}
+if (!RELEASE)
+if (typeof(window) === 'object' && typeof(process) === 'object') {
+  process.versions = process.versions || {}
+  if (typeof(process.versions) === 'object')
+  if (typeof(process.versions.node) === 'undefined') {
     /* this looks like a browser in a testing configuration */
     console.log('we\'re testing')
     module.exports = {
