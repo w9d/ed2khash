@@ -25,9 +25,15 @@ var genRand = function(size, seed) {
 }
 
 var genFile = function(generator, size, options) {
-  var opt = options || {}
-  return new File([generator(size, opt.seed)], opt.name || 'test.mp4',
-    {type: 'video/mp4'})
+  var opt = options || {}, file
+  try {
+    file = new File([generator(size, opt.seed)], opt.name || 'test.mp4',
+      {type: 'video/mp4'})
+  } catch (e) {
+    // Microsoft workaround
+    file = new Blob([generator(size, opt.seed)], {type: 'video/mp4'})
+  }
+  return file
 }
 
 module.exports = {
