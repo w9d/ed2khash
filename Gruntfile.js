@@ -46,7 +46,7 @@ module.exports = function (grunt) {
         overwrite: true,
         replacements: [
           {
-            from: /([a-zA-Z0-9\-]+)(\.js)/g,
+            from: /([a-zA-Z0-9-]+)(\.js)/g,
             to: '$1.min$2'
           }
         ]
