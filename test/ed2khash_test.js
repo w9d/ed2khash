@@ -117,8 +117,8 @@ test('onprogress callback 2', function (t) {
   var a = ed2k.ed2k_files([f])
   a.onprogress = function (a, b, c) { count += 1 }
   setTimeout(function () {
-    if (count !== 2)
-      t.fail('got ' + count + ' callbacks instead of 2')
+    if (count !== 3)
+      t.fail('got ' + count + ' callbacks instead of 3')
     else
       t.pass('correct')
   }, 2000)
@@ -132,8 +132,8 @@ test('onprogress callback 3', function (t) {
   var a = ed2k.ed2k_files([f])
   a.onprogress = function (a, b, c) { count += 1 }
   setTimeout(function () {
-    if (count !== 3)
-      t.fail('got ' + count + ' callbacks instead of 3')
+    if (count !== 4)
+      t.fail('got ' + count + ' callbacks instead of 4')
     else
       t.pass('correct')
   }, 2000)

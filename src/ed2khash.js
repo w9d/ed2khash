@@ -49,17 +49,7 @@ var ed2k_files = function (files, opts) {
       busy_work = false
       e.data['d'] = null
       queue -= 1
-      if (prop['onprogress']) {
-        let tmp_index = e.data['i']
-        let tmp_file = fileoffset
-        if (prop['onprogress']) {
-          setTimeout(function () {
-            prop['onprogress'](file,
-              multipliers[tmp_file] * (tmp_index + 1) * 9728000,
-              total_multiplier * (total_processed + (tmp_index + 1) * 9728000))
-          }, 25)
-        }
-      }
+      deferProgressCallback(e.data['i'])
       process()
     }
 
@@ -123,6 +113,19 @@ var ed2k_files = function (files, opts) {
       }
     }
 
+    function deferProgressCallback (index) {
+      if (prop['onprogress']) {
+        let tmp_index = index
+        let tmp_file = fileoffset
+        setTimeout(function () {
+          prop['onprogress'](file,
+            (multipliers[tmp_file] || 0) * (tmp_index + 1) * 9728000,
+            total_multiplier * (total_processed + (tmp_index + 1) * 9728000))
+        }, 25)
+      }
+    }
+
+    deferProgressCallback(-1)
     process()
   }
 
