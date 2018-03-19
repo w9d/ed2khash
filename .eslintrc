@@ -1,3 +1,7 @@
 {
-  "extends": "standard"
+  "extends": "standard",
+  "rules": {
+    "curly": [ "error", "multi-or-nest", "consistent" ],
+    "camelcase": "off"
+  }
 }
