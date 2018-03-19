@@ -8,15 +8,15 @@ importScripts('md4.js')
  * h = result MD4 ArrayBuffer to pass back
  */
 
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   if (!e.data['f']) {
-    var input_data = e.data['d']
-    var result = md4.arrayBuffer(input_data)
-    postMessage({'i': e.data['i'], 'h': result, 'd': input_data}, [result, input_data])
+    var inputData = e.data['d']
+    var result = md4.arrayBuffer(inputData)
+    postMessage({'i': e.data['i'], 'h': result, 'd': inputData}, [result, inputData])
   } else {
-    var hash_list = e.data['hl']
+    var hashList = e.data['hl']
     var result = md4.create()
-    for (var i = 0, chunkhash; chunkhash = hash_list[i]; i++) {
+    for (var i = 0, chunkhash; chunkhash = hashList[i]; i++) {
       result.update(chunkhash)
     }
     result = result.arrayBuffer()
