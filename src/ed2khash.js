@@ -33,6 +33,17 @@ var ed2k_files = function(files, opts) {
       busy_work = false
       e.data['d'] = null
       queue -= 1
+      if (prop['onprogress']) {
+        let tmp_index = e.data['i']
+        let tmp_file = fileoffset
+        if (prop['onprogress']) {
+          setTimeout(function() {
+            prop['onprogress'](file,
+              multipliers[tmp_file] * (tmp_index+1) * 9728000,
+              total_multiplier * (total_processed + (tmp_index+1) * 9728000))
+          }, 25)
+        }
+      }
       process()
     }
 
@@ -42,11 +53,6 @@ var ed2k_files = function(files, opts) {
       busy_read = false
       offset += 9728000
       offset_i += 1
-      if (prop['onprogress']) {
-        setTimeout(prop['onprogress'], 1, file,
-          multipliers[fileoffset] * offset,
-          total_multiplier * (total_processed + offset))
-      }
       process()
     }
     reader.onerror = function(evt) {
