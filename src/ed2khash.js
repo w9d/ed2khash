@@ -1,3 +1,6 @@
+/*** @define {boolean} */
+var RELEASE = false;
+
 var ed2k_files = function(files, opts) {
 'use strict'
   var prop = { 'onprogress': null, 'onfilecomplete': null,
@@ -55,8 +58,9 @@ var ed2k_files = function(files, opts) {
     function process() {
       if (die)
         return
-      //console.log('status: '+offset+'/'+file.size+' read='+busy_read+
-      //    ' work='+busy_work+' queue='+queue)
+      if (!RELEASE)
+        console.log('status: '+offset+'/'+file.size+' read='+busy_read+
+          ' work='+busy_work+' queue='+queue)
 
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
@@ -144,8 +148,6 @@ var ed2k_files = function(files, opts) {
 
 window['ed2k_files'] = ed2k_files
 
-/*** @define {boolean} */
-var RELEASE = false;
 var process = process || {}, module = module || {}
 if (!RELEASE)
 if (typeof(window) === 'object' && typeof(process) === 'object') {
