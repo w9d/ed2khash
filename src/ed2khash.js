@@ -108,7 +108,8 @@ var ed2k_files = function (files, opts) {
           }
           processNextFile()
         }
-        if (!RELEASE) console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
+        if (!RELEASE)
+          console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
         total_processed += file.size
       }
     }
