@@ -21,6 +21,17 @@
   const select_pfile = document.getElementById('ed2k_progress_file');
   const select_pfiles = document.getElementById('ed2k_progress_files');
   var terminate = null;
+  var ed2k_progress = function(_file, _current_file, _total_files) {
+    select_pfile.value = _current_file;
+    select_pfiles.value = _total_files;
+  }
+  var ed2k_file_done = function(f, _ed2ksum) {
+    ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
+  }
+  var ed2khash = ed2k_files();
+  ed2khash.onprogress = ed2k_progress;
+  ed2khash.onfilecomplete = ed2k_file_done;
+  ed2khash.onallcomplete = function() {nolongerprocess(false,false)};
 
   function handleFileSelect(evt) {
     var _files = evt.target.files;
@@ -63,21 +74,8 @@
       return;
     }
 
-    var ed2k_progress = function(_file, _current_file, _total_files) {
-      select_pfile.value = _current_file;
-      select_pfiles.value = _total_files;
-    }
-    var ed2k_file_done = function(f, _ed2ksum) {
-      ed2k_text.value += '|' + f.name + '|' + f.size + '|' + _ed2ksum + '|\n';
-    }
-
-    const options = {};
-    var process = ed2k_files(files, options);
-    process.onprogress = ed2k_progress;
-    process.onfilecomplete = ed2k_file_done;
-    process.onallcomplete = (function() {nolongerprocess(false,false)});
-    terminate = process.terminate;
-    process.execute();
+    terminate = ed2khash.terminate;
+    ed2khash.execute(files);
     ed2k_text.value = '';
     btnFileSelect.disabled = true;
     btnProcess.textContent = 'Stop';

@@ -2,7 +2,7 @@
 var RELEASE = false
 
 /* eslint-env browser */
-var ed2k_files = function (files, opts) {
+var ed2k_files = function () {
   'use strict'
   var prop = {
     'onprogress': null,
@@ -13,13 +13,15 @@ var ed2k_files = function (files, opts) {
   }
   var reader = new FileReader()
   var md4_worker = new Worker('md4-worker.js')
+
+  var files = null
   var fileoffset = -1
   var before = null
   var die = false
-  var total_size = files.reduce(function (a, b) { return a + b.size }, 0)
-  var total_multiplier = 1 / total_size
+  var total_size = 0
+  var total_multiplier = 0
   var total_processed = 0
-  var multipliers = files.map(function (a) { return 1 / a.size })
+  var multipliers = []
 
   md4_worker.onerror = function (e) {
     die = true
@@ -130,6 +132,32 @@ var ed2k_files = function (files, opts) {
     process()
   }
 
+  function execute (_files) {
+    files = _files
+    total_size = files.reduce(function (a, b) { return a + b.size }, 0)
+    total_multiplier = 1 / total_size
+    total_processed = 0
+    multipliers = files.map(function (a) { return 1 / a.size })
+    fileoffset = -1
+    before = Date.now()
+
+    processNextFile()
+  }
+
+  function terminate () {
+    die = true
+  }
+
+  function processNextFile () {
+    if (files[++fileoffset]) {
+      ed2k_file(files[fileoffset])
+    } else {
+      console.log('all files complete. took ' + (Date.now() - before) + 'ms')
+      if (prop['onallcomplete'])
+        setTimeout(prop['onallcomplete'], 1)
+    }
+  }
+
   function arrayBufferToHexDigest (arr) {
     // taken from js-md4
     var HEX_CHARS = '0123456789abcdef'.split('')
@@ -155,25 +183,6 @@ var ed2k_files = function (files, opts) {
     HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
     HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
     HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F]
-  }
-
-  function processNextFile () {
-    if (files[++fileoffset]) {
-      ed2k_file(files[fileoffset])
-    } else {
-      console.log('all files complete. took ' + (Date.now() - before) + 'ms')
-      if (prop['onallcomplete'])
-        setTimeout(prop['onallcomplete'], 1)
-    }
-  }
-
-  function execute () {
-    before = Date.now()
-    processNextFile()
-  }
-
-  function terminate () {
-    die = true
   }
 
   return prop
