@@ -160,18 +160,18 @@ test('onallcomplete callback 2 files', function(t) {
 test('terminate script', function(t) {
     t.plan(1)
     var count = 0,
-        f1 = com.genFile(com.genZero, 48640000)
+        f1 = com.genFile(com.genZero, 58368123)
     var a = ed2k.ed2k_files([f1])
     a.onprogress = function(_file, _progress, _total_progress) {
       if (++count === 2)
         a.terminate()
     }
     setTimeout(function() {
-      if (count !== 3)
-        t.fail('got ' + count + ' callbacks instead of 3')
+      if (count < 3 || count > 4)
+        t.fail('got ' + count + ' callbacks instead of 3 or 4')
       else
         t.pass('correct')
-    }, 2000)
+    }, 5000)
     a.execute()
 })
 
