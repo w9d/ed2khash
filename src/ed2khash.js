@@ -24,10 +24,11 @@ var ed2k_files = function(files, opts) {
   function ed2k_file(file) {
     'use strict'
     var offset = 0, offset_i = 0, queue = 0, chunks = [], chunks_i = [],
-        busy_read = false, busy_work = false, md4_list = []
+        busy_read = false, busy_work = false, md4_list = [], delay_work = []
     die = false
 
     md4_worker.onmessage = function(e) {
+      if (!RELEASE) delay_work[e.data['i']] = Date.now()-delay_work[e.data['i']]
       md4_list[e.data['i']] = e.data['h']
       busy_work = false
       e.data['d'] = null
@@ -65,6 +66,7 @@ var ed2k_files = function(files, opts) {
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
         var chunk = chunks[index]
+        if (!RELEASE) delay_work[index] = Date.now()
         busy_work = true
         md4_worker.postMessage({'i': index, 'd': chunk}, [chunk])
         chunks[index] = null
@@ -93,6 +95,7 @@ var ed2k_files = function(files, opts) {
           }
           processNextFile()
         }
+        if (!RELEASE) console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
         total_processed += file.size
       }
     }
