@@ -1,5 +1,6 @@
 'use strict'
 
+/* eslint-env browser */
 const xorshift7 = require('./xorshift7.js')
 
 var genZero = function (size) {

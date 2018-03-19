@@ -1,5 +1,8 @@
-importScripts('md4.js')
+/* eslint-env browser */
+/* global importScripts */
+/* global md4 */
 
+importScripts('md4.js')
 /***
  * f = finish status
  * d = ArrayBuffer of input data to hash
@@ -15,11 +18,10 @@ self.onmessage = function (e) {
     postMessage({'i': e.data['i'], 'h': result, 'd': inputData}, [result, inputData])
   } else {
     var hashList = e.data['hl']
-    var result = md4.create()
-    for (var i = 0, chunkhash; chunkhash = hashList[i]; i++) {
-      result.update(chunkhash)
-    }
-    result = result.arrayBuffer()
-    postMessage({'h': result}, [result])
+    var ed2k = md4.create()
+    for (var i = 0, chunkhash; (chunkhash = hashList[i]); i++)
+      ed2k.update(chunkhash)
+    ed2k = ed2k.arrayBuffer()
+    postMessage({'h': ed2k}, [ed2k])
   }
 }
