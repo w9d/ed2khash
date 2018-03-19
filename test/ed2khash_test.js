@@ -183,13 +183,14 @@ test('standard run s-b-s', function (t) {
   var f = [com.GenFile(com.genRand, 14592123, {name: 't1.mp4', seed: 1291769473}),
     com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
+  var name = ['t1.mp4', 't2.mp4', 't3.mp4', 'NEVERHAPPEN']
   var ha = ['25250410dc9672f15e5f37c96f2969b9',
     '3dfca2c114476e2c3a993007b3568f1b',
     '4e020dfd7f784b490b23ba85fadbc9f3',
     'NEVERHAPPEN']
   var a = ed2k.ed2k_files(f)
   a.onfilecomplete = function (_file, _ed2khash) {
-    if (ha[count] === _ed2khash && f[count].name === _file.name)
+    if (ha[count] === _ed2khash && name[count] === _file.name)
       good++
     count++
   }
