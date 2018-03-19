@@ -177,10 +177,9 @@ var ed2k_files = function (files, opts) {
 
 window['ed2k_files'] = ed2k_files
 
-var process = process || {}
-var module = module || {}
-
-if (!RELEASE)
+if (!RELEASE) {
+  var process = process || {}
+  var module = module || {}
   if (typeof window === 'object' && typeof process === 'object') {
     process.versions = process.versions || {}
     if (typeof process.versions === 'object') {
@@ -193,3 +192,4 @@ if (!RELEASE)
       }
     }
   }
+}
