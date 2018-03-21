@@ -8,6 +8,7 @@ var ed2k_files = function () {
     'onprogress': null,
     'onfilecomplete': null,
     'onallcomplete': null,
+    'onerror': null,
     'execute': execute,
     'terminate': terminate
   }
@@ -27,8 +28,10 @@ var ed2k_files = function () {
   md4_worker.onerror = function (e) {
     die = true
     console.error('web worker error', e)
-    window.alert('Something wrong with HTML5 Web Worker.' +
-      ' The error is...\n\n' + e.message)
+    if (prop['onerror']) {
+      setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
+        ' Web Worker. The error is...\n\n' + e.message })
+    }
   }
 
   function ed2k_file (file) {
@@ -67,8 +70,10 @@ var ed2k_files = function () {
     reader.onerror = function (evt) {
       die = true
       console.error('read error', evt.target)
-      window.alert('Something wrong with HTML5 FileReader.' +
-      ' The error is...\n\n' + evt.target.error)
+      if (prop['onerror']) {
+        setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
+          'FileReader. The error is...\n\n' + evt.target.error })
+      }
     }
 
     function process () {
