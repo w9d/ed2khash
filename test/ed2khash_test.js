@@ -23,7 +23,7 @@ const ed2k = require('../src/ed2khash.js')
 test('1 file 1 chunk-1 zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 9727999)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, 'ac44b93fc9aff773ab0005c911f8396f')
   }
@@ -33,7 +33,7 @@ test('1 file 1 chunk-1 zeros', function (t) {
 test('1 file 1 chunk zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 9728000)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, 'fc21d9af828f92a8df64beac3357425d')
   }
@@ -43,7 +43,7 @@ test('1 file 1 chunk zeros', function (t) {
 test('1 file 1 chunk+1 zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 9728001)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, '06329e9dba1373512c06386fe29e3c65')
   }
@@ -53,7 +53,7 @@ test('1 file 1 chunk+1 zeros', function (t) {
 test('1 file 2 chunks-1 zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 19455999)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, 'a4aed104a077de7e4210e7f5b131fe25')
   }
@@ -63,7 +63,7 @@ test('1 file 2 chunks-1 zeros', function (t) {
 test('1 file 2 chunks zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 19456000)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, '114b21c63a74b6ca922291a11177dd5c')
   }
@@ -73,7 +73,7 @@ test('1 file 2 chunks zeros', function (t) {
 test('1 file 2 chunks+1 zeros', function (t) {
   t.plan(1)
   var f = new com.GenFile(com.genZero, 19456001)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, 'e57f824d28f69fe90864e17673668457')
   }
@@ -83,7 +83,7 @@ test('1 file 2 chunks+1 zeros', function (t) {
 test('1 file 1 chunk-1 random', function (t) {
   t.plan(1)
   var f = com.GenFile(com.genRand, 9727999)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, '4b3edce7128daee5acf803ef4b14004d')
   }
@@ -93,7 +93,7 @@ test('1 file 1 chunk-1 random', function (t) {
 test('1 file 1 chunk random', function (t) {
   t.plan(1)
   var f = com.GenFile(com.genRand, 9728000)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, 'df1ad062dc5b2b213288f722c0d683b9')
   }
@@ -103,7 +103,7 @@ test('1 file 1 chunk random', function (t) {
 test('1 file 1 chunk+1 random', function (t) {
   t.plan(1)
   var f = com.GenFile(com.genRand, 9728001)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash, '74c23c0baeef195a01c5b28aa19b48de')
   }
@@ -114,7 +114,7 @@ test('onprogress callback 2', function (t) {
   t.plan(1)
   var count = 0
   var f = com.GenFile(com.genRand, 19455999)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onprogress = function (a, b, c) { count += 1 }
   setTimeout(function () {
     if (count !== 3)
@@ -129,7 +129,7 @@ test('onprogress callback 3', function (t) {
   t.plan(1)
   var count = 0
   var f = com.GenFile(com.genRand, 19456000)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onprogress = function (a, b, c) { count += 1 }
   setTimeout(function () {
     if (count !== 4)
@@ -145,7 +145,7 @@ test('onallcomplete callback 2 files', function (t) {
   var count = 0
   var f = [com.GenFile(com.genRand, 20000000, {name: 'test1.mkv'}),
     com.GenFile(com.genZero, 9000000, {name: 'test2.mp4'})]
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function () {}
   a.onallcomplete = function () { count += 1 }
   setTimeout(function () {
@@ -161,7 +161,7 @@ test('terminate script', function (t) {
   t.plan(1)
   var count = 0
   var f1 = com.GenFile(com.genZero, 58368123)
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onprogress = function () {
     if (++count === 2)
       a.terminate()
@@ -187,7 +187,7 @@ test('standard run s-b-s', function (t) {
     { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' },
     { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
     { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _ed2khash) {
     if (info[count].hash === _ed2khash &&
       info[count].name === _file.name &&
@@ -222,7 +222,7 @@ test('standard run object reuse s-b-s', function (t) {
     { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' },
     { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
     { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _ed2khash) {
     if (info[good].hash === _ed2khash &&
       info[good].name === _file.name &&
@@ -258,7 +258,7 @@ test('standard run object reuse guard', function (t) {
   var f = [com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
   var info = { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' }
-  var a = ed2k.ed2k_files()
+  var a = ed2k.ed2khash()
   a.onprogress = function () {
     if (++progess_count === 3)
       a.execute([f[1]])

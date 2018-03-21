@@ -2,7 +2,7 @@
 var RELEASE = false
 
 /* eslint-env browser */
-var ed2k_files = function () {
+var ed2khash = function () {
   'use strict'
   var prop = {
     'onprogress': null,
@@ -202,7 +202,7 @@ var ed2k_files = function () {
   return prop
 }
 
-window['ed2k_files'] = ed2k_files
+window['ed2khash'] = ed2khash
 
 if (!RELEASE) {
   var process = process || {}
@@ -214,7 +214,7 @@ if (!RELEASE) {
         /* this looks like a browser in a testing configuration */
         console.log('we\'re testing')
         module.exports = {
-          ed2k_files: ed2k_files
+          ed2khash: ed2khash
         }
       }
     }
