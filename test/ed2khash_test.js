@@ -175,7 +175,7 @@ test('terminate script', function (t) {
   a.execute([f1])
 })
 
-test('standard run s-b-s', function (t) {
+test('standard run', function (t) {
   t.plan(2)
   var count = 0
   var good = 0
@@ -209,7 +209,7 @@ test('standard run s-b-s', function (t) {
   a.execute(f)
 })
 
-test('standard run object reuse s-b-s', function (t) {
+test('standard run reuse', function (t) {
   t.plan(2)
   var count = 0
   var good = 0
@@ -249,7 +249,7 @@ test('standard run object reuse s-b-s', function (t) {
   a.execute([f[count++]])
 })
 
-test('standard run object reuse guard', function (t) {
+test('standard run reuse guard', function (t) {
   t.plan(2)
   var progess_count = 0
   var good = 0
@@ -285,4 +285,27 @@ test('standard run object reuse guard', function (t) {
       t.fail('got ' + finish + ' finishes instead of 1')
   }, 4000)
   a.execute([f[0]])
+})
+
+test('standard run isbusy', function (t) {
+  t.plan(13)
+  var progess_count = 0
+  var f = [com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
+    com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
+  var a = ed2k.ed2khash()
+  a.onprogress = function () {
+    t.equal(a.isbusy(), true)
+  }
+  a.onfilecomplete = function (_file, _ed2khash) {
+    if (++progess_count === 1)
+      t.equal(a.isbusy(), true)
+    else
+      t.equal(a.isbusy(), false)
+  }
+  a.onallcomplete = function () {
+    t.equal(a.isbusy(), false)
+  }
+  t.equal(a.isbusy(), false)
+  a.execute(f)
+  t.equal(a.isbusy(), true)
 })

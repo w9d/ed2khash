@@ -20,7 +20,7 @@
   const select_status = document.getElementById('filestatus');
   const select_pfile = document.getElementById('ed2k_progress_file');
   const select_pfiles = document.getElementById('ed2k_progress_files');
-  var terminate = null;
+
   var ed2k_progress = function (_file, _current_file, _total_files) {
     select_pfile.value = _current_file;
     select_pfiles.value = _total_files;
@@ -31,7 +31,7 @@
   var ed2khasher = ed2khash();
   ed2khasher.onprogress = ed2k_progress;
   ed2khasher.onfilecomplete = ed2k_file_done;
-  ed2khasher.onallcomplete = function () { nolongerprocess(false,false) };
+  ed2khasher.onallcomplete = function () { nolongerprocess(false, false) };
   ed2khasher.onerror = function (e) { window.alert('ed2khash error: ' + e.message) }
 
   function handleFileSelect(evt) {
@@ -61,12 +61,12 @@
     btnReset.disabled = true;
     btnProcess.disabled = true;
     btnFileSelect.disabled = false;
-    nolongerprocess(true,true);
+    nolongerprocess(true, true);
   }
 
   function startProcessingFiles(evt) {
-    if (terminate) {
-      nolongerprocess(true,false);
+    if (ed2khasher.isbusy()) {
+      nolongerprocess(true, false);
       return;
     }
 
@@ -75,17 +75,15 @@
       return;
     }
 
-    terminate = ed2khasher.terminate;
     ed2khasher.execute(files);
     ed2k_text.value = '';
     btnFileSelect.disabled = true;
     btnProcess.textContent = 'Stop';
   }
 
-  function nolongerprocess(really_do_it, progressbar) {
-    if (terminate && really_do_it)
-      terminate();
-    terminate = null;
+  function nolongerprocess(kill_active, progressbar) {
+    if (kill_active)
+      ed2khasher.terminate();
     btnFileSelect.disabled = false;
     btnProcess.textContent = 'Process';
     if (progressbar) {

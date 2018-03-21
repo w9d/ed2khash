@@ -9,6 +9,7 @@ var ed2khash = function () {
     'onfilecomplete': null,
     'onallcomplete': null,
     'onerror': null,
+    'isbusy': isbusy,
     'execute': execute,
     'terminate': terminate
   }
@@ -138,6 +139,10 @@ var ed2khash = function () {
 
     deferProgressCallback(-1)
     process()
+  }
+
+  function isbusy () {
+    return busy === true
   }
 
   function execute (_files) {
