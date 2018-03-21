@@ -17,7 +17,8 @@ var ed2k_files = function () {
   var files = null
   var fileoffset = -1
   var before = null
-  var die = false
+  var die = true
+  var busy = false
   var total_size = 0
   var total_multiplier = 0
   var total_processed = 0
@@ -71,8 +72,10 @@ var ed2k_files = function () {
     }
 
     function process () {
-      if (die)
+      if (die) {
+        busy = false
         return
+      }
       if (!RELEASE) {
         console.log('status: ' + offset + '/' + file.size + ' read=' +
           busy_read + ' work=' + busy_work + ' queue=' + queue)
@@ -133,6 +136,10 @@ var ed2k_files = function () {
   }
 
   function execute (_files) {
+    if (busy) {
+      console.error('currently busy processing')
+      return
+    }
     files = _files
     total_size = files.reduce(function (a, b) { return a + b.size }, 0)
     total_multiplier = 1 / total_size
@@ -140,6 +147,7 @@ var ed2k_files = function () {
     multipliers = files.map(function (a) { return 1 / a.size })
     fileoffset = -1
     before = Date.now()
+    busy = true
 
     processNextFile()
   }
@@ -155,6 +163,7 @@ var ed2k_files = function () {
       console.log('all files complete. took ' + (Date.now() - before) + 'ms')
       if (prop['onallcomplete'])
         setTimeout(prop['onallcomplete'], 1)
+      busy = false
     }
   }
 

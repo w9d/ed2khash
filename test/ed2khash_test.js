@@ -213,6 +213,7 @@ test('standard run object reuse s-b-s', function (t) {
   t.plan(2)
   var count = 0
   var good = 0
+  var bad = 0
   var finish = 0
   var f = [com.GenFile(com.genRand, 14592123, {name: 't1.mp4', seed: 1291769473}),
     com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
@@ -227,6 +228,8 @@ test('standard run object reuse s-b-s', function (t) {
       info[good].name === _file.name &&
       info[good].size === _file.size)
       good++
+    else
+      bad++
   }
   a.onallcomplete = function () {
     finish += 1
@@ -234,7 +237,7 @@ test('standard run object reuse s-b-s', function (t) {
       a.execute([f[count++]])
   }
   setTimeout(function () {
-    if (good === 3)
+    if (good === 3 && bad === 0)
       t.pass('good files')
     else
       t.fail('got ' + good + ' successful files processed instead of 3')
@@ -244,4 +247,42 @@ test('standard run object reuse s-b-s', function (t) {
       t.fail('got ' + finish + ' finishes instead of 3')
   }, 6000)
   a.execute([f[count++]])
+})
+
+test('standard run object reuse guard', function (t) {
+  t.plan(2)
+  var progess_count = 0
+  var good = 0
+  var bad = 0
+  var finish = 0
+  var f = [com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
+    com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
+  var info = { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' }
+  var a = ed2k.ed2k_files()
+  a.onprogress = function () {
+    if (++progess_count === 3)
+      a.execute([f[1]])
+  }
+  a.onfilecomplete = function (_file, _ed2khash) {
+    if (info.hash === _ed2khash &&
+      info.name === _file.name &&
+      info.size === _file.size)
+      good++
+    else
+      bad++
+  }
+  a.onallcomplete = function () {
+    finish += 1
+  }
+  setTimeout(function () {
+    if (good === 1 && bad === 0)
+      t.pass('good files')
+    else
+      t.fail('got ' + good + ' successful and ' + bad + ' bad')
+    if (finish === 1)
+      t.pass('good finish')
+    else
+      t.fail('got ' + finish + ' finishes instead of 1')
+  }, 4000)
+  a.execute([f[0]])
 })
