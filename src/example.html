@@ -1,8 +1,8 @@
 
 <div style="padding: 10px; border: 1px solid #ccc;">
-<input type="file" id="files" accept=".mkv, .mp4, .avi" multiple /><br />
-<button id="reset" name="reset_files" disabled="true">Reset</button>
-<button id="process" name="process_files" disabled="true">Process</button><br />
+<input type="file" id="files" accept=".mkv, .mp4, .avi" multiple style="height:40px" />
+<button id="reset" name="reset_files" disabled="true" style="height:40px">Reset</button>
+<button id="process" name="process_files" disabled="true" style="height:40px">Process</button><br />
 <div id="filestatus"></div><hr />
 <progress id="ed2k_progress_file" style="width:100%"></progress><br />
 <progress id="ed2k_progress_files" style="width:100%"></progress>
@@ -13,13 +13,13 @@
 <script>
 (function() {
   var files = [];
-  const ed2k_text = document.getElementById('ed2k_text');
-  const btnReset = document.getElementById('reset');
-  const btnProcess = document.getElementById('process');
-  const btnFileSelect = document.getElementById('files');
-  const select_status = document.getElementById('filestatus');
-  const select_pfile = document.getElementById('ed2k_progress_file');
-  const select_pfiles = document.getElementById('ed2k_progress_files');
+  var ed2k_text = document.getElementById('ed2k_text');
+  var btnReset = document.getElementById('reset');
+  var btnProcess = document.getElementById('process');
+  var btnFileSelect = document.getElementById('files');
+  var select_status = document.getElementById('filestatus');
+  var select_pfile = document.getElementById('ed2k_progress_file');
+  var select_pfiles = document.getElementById('ed2k_progress_files');
 
   var ed2k_progress = function (_file, _current_file, _total_files) {
     select_pfile.value = _current_file;
