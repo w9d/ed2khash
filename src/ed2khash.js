@@ -128,10 +128,11 @@ var ed2khash = function () {
     function deferProgressCallback (index) {
       if (prop['onprogress']) {
         var tmp_file = fileoffset
+        var tmp_total_processed = total_processed
         setTimeout(function () {
           prop['onprogress'](file,
             multipliers[tmp_file] * (index + 1) * 9728000,
-            total_multiplier * (total_processed + (index + 1) * 9728000))
+            total_multiplier * (tmp_total_processed + (index + 1) * 9728000))
         }, 25)
       }
     }
