@@ -1,3 +1,5 @@
+goog.provide("ti.ed2khash")
+
 /*** @define {boolean} */
 var RELEASE = false
 

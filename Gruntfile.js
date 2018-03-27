@@ -29,8 +29,10 @@ module.exports = function (grunt) {
       },
       distc: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
-          "--define='RELEASE=true' --js ed2khash.js --js_output_file",
-          'ed2khash.min.js && rm ed2khash.js'].join(' '),
+          '--dependency_mode STRICT --entry_point=ti.ed2khash --js ed2khash.js',
+          '--js="../node_modules/google-closure-library/**.js"',
+          '--js_output_file ed2khash.min.js',
+          ' && rm ed2khash.js'].join(' '),
         options: { execOptions: { cwd: 'dist' } }
       },
       testa: {
@@ -45,7 +47,9 @@ module.exports = function (grunt) {
       },
       testc: {
         command: ['closure-compiler -O BUNDLE --language_in ECMASCRIPT_2017',
-          '--js ed2khash.js --js_output_file ed2khash.min.js',
+          '--dependency_mode STRICT --entry_point=ti.ed2khash --js ed2khash.js',
+          '--js="../node_modules/google-closure-library/**.js"',
+          '--js_output_file ed2khash.min.js',
           ' && rm ed2khash.js'].join(' '),
         options: { execOptions: { cwd: 'build-test' } }
       }
