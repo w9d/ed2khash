@@ -18,7 +18,7 @@
 const test = require('tape')
 const com = require('./common.js')
 
-const ed2k = require('../src/ed2khash.js')
+const ed2k = require('../build-test/ed2khash.min.js')
 
 test('1 file 1 chunk-1 zeros', function (t) {
   t.plan(1)

@@ -210,18 +210,11 @@ var ed2khash = function () {
 window['ed2khash'] = ed2khash
 
 if (!RELEASE) {
-  var process = process || {}
   var module = module || {}
-  if (typeof window === 'object' && typeof process === 'object') {
-    process.versions = process.versions || {}
-    if (typeof process.versions === 'object') {
-      if (typeof process.versions.node === 'undefined') {
-        /* this looks like a browser in a testing configuration */
-        console.log('we\'re testing')
-        module.exports = {
-          ed2khash: ed2khash
-        }
-      }
-    }
+
+  /* not a release, testing? */
+  console.log('we\'re testing')
+  module.exports = {
+    ed2khash: ed2khash
   }
 }
