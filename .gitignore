@@ -1,6 +1,7 @@
 *~
 *.bin
 /dist
+/build-rel
 /build-test
 /external
 /node_modules

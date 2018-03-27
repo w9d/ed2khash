@@ -19,13 +19,14 @@ module.exports = function (grunt) {
         options: { execOptions: { cwd: 'build-test' } }
       },
       dista: {
-        command: ['rm -rf dist', 'mkdir dist', 'cp src/*.html src/*.js dist'].join('&&')
+        command: ['rm -rf build-rel', 'mkdir build-rel',
+          'cp src/*.html src/*.js build-rel'].join('&&')
       },
       distb: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
           '--js md4.js --js md4-worker.js --js_output_file md4-worker.min.js',
           ' && rm md4.js md4-worker.js'].join(' '),
-        options: { execOptions: { cwd: 'dist' } }
+        options: { execOptions: { cwd: 'build-rel' } }
       },
       distc: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
@@ -33,7 +34,7 @@ module.exports = function (grunt) {
           '--js="../node_modules/google-closure-library/**.js"',
           '--js_output_file ed2khash.min.js',
           ' && rm ed2khash.js'].join(' '),
-        options: { execOptions: { cwd: 'dist' } }
+        options: { execOptions: { cwd: 'build-rel' } }
       },
       testa: {
         command: ['rm -rf build-test', 'mkdir build-test',
@@ -56,18 +57,18 @@ module.exports = function (grunt) {
     },
     replace: {
       removeMD4Import: {
-        src: ['dist/md4-worker.js', 'build-test/md4-worker.js'],
+        src: ['build-rel/md4-worker.js', 'build-test/md4-worker.js'],
         overwrite: true,
         replacements: [
           { from: 'importScripts(\'md4.js\')', to: '' }
         ]
       },
       updateLocations: {
-        src: ['dist/*', 'build-test/*'],
+        src: ['build-rel/*', 'build-test/*'],
         overwrite: true,
         replacements: [
           {
-            from: /([\'\"][a-zA-Z0-9-]+)(\.js[\'\"])/g,
+            from: /(['"][a-zA-Z0-9-]+)(\.js['"])/g,
             to: '$1.min$2'
           }
         ]
@@ -83,10 +84,12 @@ module.exports = function (grunt) {
   grunt.registerTask('hint', ['jshint'])
   grunt.registerTask('standard', ['eslint'])
 
-  grunt.registerTask('build', ['shell:dista', 'replace:removeMD4Import',
+  grunt.registerTask('build-rel', ['shell:dista', 'replace:removeMD4Import',
     'replace:updateLocations', 'shell:distb', 'shell:distc'])
   grunt.registerTask('build-test', ['shell:testa', 'replace:removeMD4Import',
     'replace:updateLocations', 'shell:testb', 'shell:testc'])
+  grunt.registerTask('build', ['build-rel'])
+  grunt.registerTask('build-release', ['build-rel'])
 
   grunt.registerTask('test-local', ['build-test', 'shell:zuullocal'])
   grunt.registerTask('test-tape', ['build-test', 'shell:taperun'])
