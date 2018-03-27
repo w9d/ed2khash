@@ -1,9 +1,10 @@
-goog.provide("ti.ed2khash")
+/* eslint-env browser */
+/* global goog */
+goog.provide('ti.ed2khash')
 
 /*** @define {boolean} */
 var RELEASE = false
 
-/* eslint-env browser */
 var ed2khash = function () {
   'use strict'
   var prop = {
