@@ -15,7 +15,7 @@ module.exports = function (grunt) {
           '--wait 60 --static build-test'].join(' ')
       },
       zuullocal: {
-        command: 'zuul --ui tape --local 9000 ../test/ed2khash_test.js',
+        command: 'zuul --ui tape --local 9000 --no-coverage ../test/ed2khash_test.js',
         options: { execOptions: { cwd: 'build-test' } }
       },
       dista: {
