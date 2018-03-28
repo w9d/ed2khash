@@ -1,3 +1,5 @@
+goog.provide('emn178.jsmd4')
+
 /**
  * [js-md4]{@link https://github.com/emn178/js-md4}
  *

@@ -14,7 +14,7 @@ var ed2khash = function () {
     'terminate': terminate
   }
   var reader = new FileReader()
-  var md4_worker = new Worker('md4-worker.js')
+  var md4_worker = new Worker('md4-worker.min.js')
 
   var files = null
   var fileoffset = -1

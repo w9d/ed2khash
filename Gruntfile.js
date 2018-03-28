@@ -20,60 +20,43 @@ module.exports = function (grunt) {
       },
       dista: {
         command: ['rm -rf build-rel', 'mkdir build-rel',
-          'cp src/*.html src/*.js build-rel'].join('&&')
+          'cp src/*.html build-rel'].join('&&')
       },
       distb: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
-          '-D goog.DEBUG=false',
-          '--js md4.js --js md4-worker.js --js_output_file md4-worker.min.js',
-          ' && rm md4.js md4-worker.js'].join(' '),
+          '-D goog.DEBUG=false --dependency_mode STRICT',
+          '--entry_point=ti.ed2khash.worker --js_output_file md4-worker.min.js',
+          '--js="../src/**.js"',
+          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
         options: { execOptions: { cwd: 'build-rel' } }
       },
       distc: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
-          '-D goog.DEBUG=false',
-          '--dependency_mode STRICT --entry_point=ti.ed2khash --js ed2khash.js',
-          '--js="../node_modules/google-closure-library/**.js"',
-          '--js_output_file ed2khash.min.js',
-          ' && rm ed2khash.js'].join(' '),
+          '-D goog.DEBUG=false --dependency_mode STRICT',
+          '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
+          '--js="../src/**.js"',
+          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
         options: { execOptions: { cwd: 'build-rel' } }
       },
       testa: {
         command: ['rm -rf build-test', 'mkdir build-test',
-          'cp src/*.html src/*.js build-test'].join('&&')
+          'cp src/*.html build-test'].join('&&')
       },
       testb: {
         command: ['closure-compiler -O BUNDLE --language_in ECMASCRIPT_2017',
-          '--js md4.js --js md4-worker.js --js_output_file md4-worker.min.js',
-          ' && rm md4.js md4-worker.js'].join(' '),
+          '--dependency_mode STRICT',
+          '--entry_point=ti.ed2khash.worker --js_output_file md4-worker.min.js',
+          '--js="../src/**.js"',
+          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
         options: { execOptions: { cwd: 'build-test' } }
       },
       testc: {
         command: ['closure-compiler -O BUNDLE --language_in ECMASCRIPT_2017',
-          '--dependency_mode STRICT --entry_point=ti.ed2khash --js ed2khash.js',
-          '--js="../node_modules/google-closure-library/**.js"',
-          '--js_output_file ed2khash.min.js',
-          ' && rm ed2khash.js'].join(' '),
+          '--dependency_mode STRICT',
+          '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
+          '--js="../src/**.js"',
+          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
         options: { execOptions: { cwd: 'build-test' } }
-      }
-    },
-    replace: {
-      removeMD4Import: {
-        src: ['build-rel/md4-worker.js', 'build-test/md4-worker.js'],
-        overwrite: true,
-        replacements: [
-          { from: 'importScripts(\'md4.js\')', to: '' }
-        ]
-      },
-      updateLocations: {
-        src: ['build-rel/*', 'build-test/*'],
-        overwrite: true,
-        replacements: [
-          {
-            from: /(['"][a-zA-Z0-9-]+)(\.js['"])/g,
-            to: '$1.min$2'
-          }
-        ]
       }
     }
   })
@@ -81,15 +64,13 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-eslint')
   grunt.loadNpmTasks('grunt-shell')
-  grunt.loadNpmTasks('grunt-text-replace')
 
   grunt.registerTask('hint', ['jshint'])
   grunt.registerTask('standard', ['eslint'])
 
-  grunt.registerTask('build-rel', ['shell:dista', 'replace:removeMD4Import',
-    'replace:updateLocations', 'shell:distb', 'shell:distc'])
-  grunt.registerTask('build-test', ['shell:testa', 'replace:removeMD4Import',
-    'replace:updateLocations', 'shell:testb', 'shell:testc'])
+  grunt.registerTask('build-rel', ['shell:dista', 'shell:distb', 'shell:distc'])
+  grunt.registerTask('build-test', ['shell:testa', 'shell:testb',
+    'shell:testc'])
   grunt.registerTask('build', ['build-rel'])
   grunt.registerTask('build-release', ['build-rel'])
 

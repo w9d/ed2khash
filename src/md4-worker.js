@@ -2,7 +2,9 @@
 /* global importScripts */
 /* global md4 */
 
-importScripts('md4.js')
+goog.provide('ti.ed2khash.worker')
+goog.require('emn178.jsmd4')
+
 /***
  * f = finish status
  * d = ArrayBuffer of input data to hash
