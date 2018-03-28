@@ -2,9 +2,6 @@
 /* global goog */
 goog.provide('ti.ed2khash')
 
-/*** @define {boolean} */
-var RELEASE = false
-
 var ed2khash = function () {
   'use strict'
   var prop = {
@@ -53,7 +50,7 @@ var ed2khash = function () {
     die = false
 
     md4_worker.onmessage = function (e) {
-      if (!RELEASE)
+      if (goog.DEBUG)
         delay_work[e.data['i']] = Date.now() - delay_work[e.data['i']]
       md4_list[e.data['i']] = e.data['h']
       busy_work = false
@@ -85,7 +82,7 @@ var ed2khash = function () {
         busy = false
         return
       }
-      if (!RELEASE) {
+      if (goog.DEBUG) {
         console.log('status: ' + offset + '/' + file.size + ' read=' +
           busy_read + ' work=' + busy_work + ' queue=' + queue)
       }
@@ -93,7 +90,7 @@ var ed2khash = function () {
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
         var chunk = chunks[index]
-        if (!RELEASE) delay_work[index] = Date.now()
+        if (goog.DEBUG) delay_work[index] = Date.now()
         busy_work = true
         md4_worker.postMessage({'i': index, 'd': chunk}, [chunk])
         chunks[index] = null
@@ -122,7 +119,7 @@ var ed2khash = function () {
           }
           processNextFile()
         }
-        if (!RELEASE)
+        if (goog.DEBUG)
           console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
         total_processed += file.size
       }
@@ -212,7 +209,7 @@ var ed2khash = function () {
 
 window['ed2khash'] = ed2khash
 
-if (!RELEASE) {
+if (goog.DEBUG) {
   var module = module || {}
 
   /* not a release, testing? */

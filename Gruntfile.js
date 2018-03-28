@@ -24,12 +24,14 @@ module.exports = function (grunt) {
       },
       distb: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
+          '-D goog.DEBUG=false',
           '--js md4.js --js md4-worker.js --js_output_file md4-worker.min.js',
           ' && rm md4.js md4-worker.js'].join(' '),
         options: { execOptions: { cwd: 'build-rel' } }
       },
       distc: {
         command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
+          '-D goog.DEBUG=false',
           '--dependency_mode STRICT --entry_point=ti.ed2khash --js ed2khash.js',
           '--js="../node_modules/google-closure-library/**.js"',
           '--js_output_file ed2khash.min.js',
