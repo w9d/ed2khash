@@ -41,7 +41,7 @@ var md4 = (function () {
   }
   var COMMON_JS = false;
   var AMD = false;
-  var ARRAY_BUFFER = !root.JS_MD4_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
+  var ARRAY_BUFFER = typeof ArrayBuffer !== 'undefined';
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
   var SHIFT = [0, 8, 16, 24];
@@ -92,6 +92,11 @@ var md4 = (function () {
    * @example
    * md4.buffer('The quick brown fox jumps over the lazy dog');
    */
+  /**
+   * @method createOutputMethod
+   * @param {!string} outputType
+   * @returns {!function((String|Array|Uint8Array|ArrayBuffer)): !Md4}
+   */
   var createOutputMethod = function (outputType) {
     return function(message) {
       return new Md4(true).update(message)[outputType]();
@@ -118,10 +123,14 @@ var md4 = (function () {
    * var hash = md4.create();
    * hash.update('The quick brown fox jumps over the lazy dog');
    */
+  /**
+   * @method createMethod
+   * @returns {!function((String|Array|Uint8Array|ArrayBuffer)): !Md4}
+   */
   var createMethod = function () {
     var method = createOutputMethod('hex');
     method.create = function () {
-      return new Md4();
+      return new Md4(undefined);
     };
     method.update = function (message) {
       return method.create().update(message);
@@ -136,6 +145,7 @@ var md4 = (function () {
   /**
    * Md4 class
    * @class Md4
+   * @constructor
    * @description This is internal class.
    * @see {@link md4.create}
    */
@@ -167,7 +177,7 @@ var md4 = (function () {
    * @instance
    * @description Update hash
    * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {Md4} MD4 object.
+   * @returns {(Md4|undefined)} MD4 object.
    * @see {@link md4.update}
    */
   Md4.prototype.update = function (message) {
@@ -437,7 +447,7 @@ var md4 = (function () {
    * @memberof Md4
    * @instance
    * @description Output hash as hex string
-   * @returns {String} Hex string
+   * @return {!string} Hex string
    * @see {@link md4.hex}
    * @example
    * hash.hex();
@@ -470,7 +480,7 @@ var md4 = (function () {
    * @memberof Md4
    * @instance
    * @description Output hash as hex string
-   * @returns {String} Hex string
+   * @returns {!string} Hex string
    * @see {@link md4.hex}
    * @example
    * hash.toString();
