@@ -207,14 +207,4 @@ var ed2khash = function () {
   return prop
 }
 
-window['ed2khash'] = ed2khash
-
-if (goog.DEBUG) {
-  var module = module || {}
-
-  /* not a release, testing? */
-  console.log('we\'re testing')
-  module.exports = {
-    ed2khash: ed2khash
-  }
-}
+goog.exportSymbol('ed2khash', ed2khash)

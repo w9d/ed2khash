@@ -55,7 +55,18 @@ module.exports = function (grunt) {
           '--dependency_mode STRICT',
           '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
           '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
+          '--js="../node_modules/google-closure-library/**.js"' /*,
+          '--output_wrapper="(function (root, factory) {',
+          'if (typeof define === \'function\' && define.amd)',
+          '  define([], factory);',
+          'else if (typeof module === \'object\' && module.exports)',
+          '  module.exports.ed2khash = factory();',
+          'else',
+          '  root.ed2khash = factory();',
+          '})(this, function() {',
+          '  %output%',
+          '  ;return ed2khash;',
+          '})"'*/].join(' '),
         options: { execOptions: { cwd: 'build-test' } }
       }
     }
