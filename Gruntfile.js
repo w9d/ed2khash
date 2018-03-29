@@ -12,51 +12,32 @@ module.exports = function (grunt) {
       taperun: {
         command: ['./node_modules/browserify/bin/cmd.js',
           './test/ed2khash_test.js|./node_modules/tape-run/bin/run.js',
-          '--wait 60 --static build-test'].join(' ')
+          '--wait 60 --static build-rel'].join(' ')
       },
       zuullocal: {
         command: 'zuul --ui tape --local 9000 --no-coverage ../test/ed2khash_test.js',
-        options: { execOptions: { cwd: 'build-test' } }
-      },
-      dista: {
-        command: ['rm -rf build-rel', 'mkdir build-rel',
-          'cp src/*.html build-rel'].join('&&')
-      },
-      distb: {
-        command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
-          '-D goog.DEBUG=false --dependency_mode STRICT',
-          '--entry_point=ti.ed2khash.worker --js_output_file md4-worker.min.js',
-          '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
         options: { execOptions: { cwd: 'build-rel' } }
       },
-      distc: {
-        command: ['closure-compiler -O ADVANCED --language_in ECMASCRIPT_2017',
-          '-D goog.DEBUG=false --dependency_mode STRICT',
-          '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
-          '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
-        options: { execOptions: { cwd: 'build-rel' } }
+      clean: {
+        command: dir => ['mkdir build-' + dir + ' 2>/dev/null||true',
+          'rm -rf build-' + dir + '/* build-' + dir + '/.* 2>/dev/null||true',
+          'cp src/*.html build-' + dir].join('&&')
       },
-      testa: {
-        command: ['rm -rf build-test', 'mkdir build-test',
-          'cp src/*.html build-test'].join('&&')
-      },
-      testb: {
-        command: ['closure-compiler -O BUNDLE --language_in ECMASCRIPT_2017',
-          '--dependency_mode STRICT',
+      closure_md4: {
+        command: (mode, dir, debug) => ['cd build-' + dir + '&&',
+          'closure-compiler -O ' + mode + ' -D goog.DEBUG=' + (debug==='debug'),
+          '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
           '--entry_point=ti.ed2khash.worker --js_output_file md4-worker.min.js',
           '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
-        options: { execOptions: { cwd: 'build-test' } }
+          '--js="../node_modules/google-closure-library/**.js"'].join(' ')
       },
-      testc: {
-        command: ['closure-compiler -O BUNDLE --language_in ECMASCRIPT_2017',
-          '--dependency_mode STRICT',
+      closure_ed2khash: {
+        command: (mode, dir, debug) => ['cd build-' + dir + '&&',
+          'closure-compiler -O ' + mode + ' -D goog.DEBUG=' + (debug==='debug'),
+          ' --language_in ECMASCRIPT_2017 --dependency_mode STRICT',
           '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
           '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' '),
-        options: { execOptions: { cwd: 'build-test' } }
+          '--js="../node_modules/google-closure-library/**.js"'].join(' ')
       }
     }
   })
@@ -68,14 +49,16 @@ module.exports = function (grunt) {
   grunt.registerTask('hint', ['jshint'])
   grunt.registerTask('standard', ['eslint'])
 
-  grunt.registerTask('build-rel', ['shell:dista', 'shell:distb', 'shell:distc'])
-  grunt.registerTask('build-test', ['shell:testa', 'shell:testb',
-    'shell:testc'])
+  grunt.registerTask('build-rel', ['shell:clean:rel',
+    'shell:closure_md4:ADVANCED:rel', 'shell:closure_ed2khash:ADVANCED:rel'])
+  grunt.registerTask('build-test', ['shell:clean:test',
+    'shell:closure_md4:BUNDLE:test', 'shell:closure_ed2khash:BUNDLE:test'])
+
   grunt.registerTask('build', ['build-rel'])
   grunt.registerTask('build-release', ['build-rel'])
 
-  grunt.registerTask('test-local', ['build-test', 'shell:zuullocal'])
-  grunt.registerTask('test-tape', ['build-test', 'shell:taperun'])
+  grunt.registerTask('test-local', ['build-rel', 'shell:zuullocal'])
+  grunt.registerTask('test-tape', ['build-rel', 'shell:taperun'])
 
   grunt.registerTask('default', [])
 }
