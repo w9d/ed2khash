@@ -1,4 +1,6 @@
+/* global goog */
 goog.provide('emn178.jsmd4')
+/* eslint-disable */
 
 /**
  * [js-md4]{@link https://github.com/emn178/js-md4}
@@ -9,7 +11,6 @@ goog.provide('emn178.jsmd4')
  * @copyright Yi-Cyuan Chen 2015-2027
  * @license MIT
  */
-/* eslint-disable */
 /*jslint bitwise: true */
 /**
  * @method md4

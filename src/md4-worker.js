@@ -1,6 +1,5 @@
 /* eslint-env browser */
-/* global importScripts */
-/* global md4 */
+/* global md4 goog */
 
 goog.provide('ti.ed2khash.worker')
 goog.require('emn178.jsmd4')
