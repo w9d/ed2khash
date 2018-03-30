@@ -1,6 +1,6 @@
 /* eslint-env browser */
 /* global goog */
-goog.provide('ti.ed2khash')
+goog.provide('ed2khash')
 
 var ed2khash = function () {
   'use strict'

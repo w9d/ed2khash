@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* global md4 goog */
 
-goog.provide('ti.ed2khash.worker')
+goog.provide('ed2khash.worker')
 goog.require('emn178.jsmd4')
 
 /***

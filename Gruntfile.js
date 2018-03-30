@@ -28,7 +28,7 @@ module.exports = function (grunt) {
           'closure-compiler -O ' + mode,
           '-D goog.DEBUG=' + (debug === 'debug'),
           '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
-          '--entry_point=ti.ed2khash.worker --js_output_file md4-worker.min.js',
+          '--entry_point=ed2khash.worker --js_output_file md4-worker.min.js',
           '--js="../src/**.js"',
           '--js="../node_modules/google-closure-library/**.js"'].join(' ')
       },
@@ -37,7 +37,7 @@ module.exports = function (grunt) {
           'closure-compiler -O ' + mode,
           '-D goog.DEBUG=' + (debug === 'debug'),
           '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
-          '--entry_point=ti.ed2khash --js_output_file ed2khash.min.js',
+          '--entry_point=ed2khash --js_output_file ed2khash.min.js',
           '--js="../src/**.js"',
           '--js="../node_modules/google-closure-library/**.js"'].join(' ')
       }
