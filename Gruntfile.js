@@ -26,7 +26,7 @@ module.exports = function (grunt) {
       closure_md4: {
         command: (mode, dir, debug) => ['cd build-' + dir + '&&',
           'closure-compiler -O ' + mode,
-          '-D goog.DEBUG=' + (debug === 'debug'),
+          '-D goog.DEBUG=' + (debug === 'debug') + ' -W VERBOSE',
           '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
           '--entry_point=ed2khash.worker --js_output_file md4-worker.min.js',
           '--js="../src/**.js"',
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
       closure_ed2khash: {
         command: (mode, dir, debug) => ['cd build-' + dir + '&&',
           'closure-compiler -O ' + mode,
-          '-D goog.DEBUG=' + (debug === 'debug'),
+          '-D goog.DEBUG=' + (debug === 'debug') + ' -W VERBOSE',
           '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
           '--entry_point=ed2khash --js_output_file ed2khash.min.js',
           '--js="../src/**.js"',
