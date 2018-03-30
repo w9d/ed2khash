@@ -104,27 +104,28 @@ var ed2khash = function () {
     }
 
     function finishProcessingFile () {
-      if (file.size >= 9728000) {
-        // calculate final hash...
-        md4_worker.onmessage = function (e) {
-          if (prop['onfilecomplete']) {
-            setTimeout(prop['onfilecomplete'], 1, file,
-              arrayBufferToHexDigest(e.data['h']))
-          }
-          processNextFile()
-        }
-        md4_worker.postMessage({'f': true, 'hl': md4_list})
-        die = true
-      } else {
-        if (prop['onfilecomplete']) {
-          setTimeout(prop['onfilecomplete'], 1, file,
-            arrayBufferToHexDigest(md4_list[0]))
-        }
-        processNextFile()
+      total_processed += file.size
+      if (md4_list.length === 1) {
+        deferFileCompleteCallbackNF(file, md4_list[0])
+        return
       }
+
+      // calculate final hash...
+      md4_worker.onmessage = function (e) {
+        deferFileCompleteCallbackNF(file, e.data['h'])
+      }
+      md4_worker.postMessage({'f': true, 'hl': md4_list})
+      die = true
+    }
+
+    function deferFileCompleteCallbackNF (_file, _hashArrayBuffer) {
+      if (prop['onfilecomplete']) {
+        setTimeout(prop['onfilecomplete'], 1, _file,
+          arrayBufferToHexDigest(_hashArrayBuffer))
+      }
+      processNextFile()
       if (goog.DEBUG)
         console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
-      total_processed += file.size
     }
 
     function deferProgressCallback (index) {
