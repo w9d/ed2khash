@@ -101,28 +101,32 @@ var ed2khash = function () {
         queue += 1
         reader.readAsArrayBuffer(file.slice(offset, offset + 9728000))
       } else if (!busy_read && !busy_work && queue === 0) {
-        if (file.size >= 9728000) {
-          // calculate final hash...
-          md4_worker.onmessage = function (e) {
-            if (prop['onfilecomplete']) {
-              setTimeout(prop['onfilecomplete'], 1, file,
-                arrayBufferToHexDigest(e.data['h']))
-            }
-            processNextFile()
-          }
-          md4_worker.postMessage({'f': true, 'hl': md4_list})
-          die = true
-        } else {
+        finishProcessingFile()
+      }
+    }
+
+    function finishProcessingFile () {
+      if (file.size >= 9728000) {
+        // calculate final hash...
+        md4_worker.onmessage = function (e) {
           if (prop['onfilecomplete']) {
             setTimeout(prop['onfilecomplete'], 1, file,
-              arrayBufferToHexDigest(md4_list[0]))
+              arrayBufferToHexDigest(e.data['h']))
           }
           processNextFile()
         }
-        if (goog.DEBUG)
-          console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
-        total_processed += file.size
+        md4_worker.postMessage({'f': true, 'hl': md4_list})
+        die = true
+      } else {
+        if (prop['onfilecomplete']) {
+          setTimeout(prop['onfilecomplete'], 1, file,
+            arrayBufferToHexDigest(md4_list[0]))
+        }
+        processNextFile()
       }
+      if (goog.DEBUG)
+        console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
+      total_processed += file.size
     }
 
     function deferProgressCallback (index) {
