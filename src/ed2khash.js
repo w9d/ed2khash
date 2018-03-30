@@ -34,6 +34,14 @@ var ed2khash = function () {
         ' Web Worker. The error is...\n\n' + e.message })
     }
   }
+  reader.onerror = function (evt) {
+    die = true
+    console.error('read error', evt.target)
+    if (prop['onerror']) {
+      setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
+        ' FileReader. The error is...\n\n' + evt.target.error })
+    }
+  }
 
   function ed2k_file (file) {
     'use strict'
@@ -48,7 +56,6 @@ var ed2khash = function () {
     var delay_work = []
 
     die = false
-
     md4_worker.onmessage = function (e) {
       if (goog.DEBUG)
         delay_work[e.data['i']] = Date.now() - delay_work[e.data['i']]
@@ -59,7 +66,6 @@ var ed2khash = function () {
       deferProgressCallback(e.data['i'])
       process()
     }
-
     reader.onload = function (evt) {
       chunks[offset_i] = evt.target.result
       chunks_i.push(offset_i)
@@ -67,14 +73,6 @@ var ed2khash = function () {
       offset += 9728000
       offset_i += 1
       process()
-    }
-    reader.onerror = function (evt) {
-      die = true
-      console.error('read error', evt.target)
-      if (prop['onerror']) {
-        setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
-          'FileReader. The error is...\n\n' + evt.target.error })
-      }
     }
 
     function process () {
