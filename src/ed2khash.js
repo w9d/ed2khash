@@ -190,9 +190,27 @@ var ed2khash = function () {
       var sum = Long.fromBits(0, 0, true)
       var high = null
       var low = null
+      // File (8 bytes, 64 bits):
+      // ===== ===== ===== ===== ===== ===== ===== =====
+      // = 1 = = 2 = = 3 = = 4 = = 5 = = 6 = = 7 = = 8 =
+      // ===== ===== ===== ===== ===== ===== ===== =====
+      // MPC wants it in little endian:
+      // ===== ===== ===== ===== ===== ===== ===== =====
+      // = 8 = = 7 = = 6 = = 5 = = 4 = = 3 = = 2 = = 1 =
+      // ===== ===== ===== ===== ===== ===== ===== =====
+      // we cannot work with 8 bytes safely in javascript so use 4 bytes/"read"
+      // ===== ===== ===== =====   ===== ===== ===== =====
+      // = 4 = = 3 = = 2 = = 1 =   = 8 = = 7 = = 6 = = 5 =
+      // ===== ===== ===== =====   ===== ===== ===== =====
+      // swap it for consumption by long.js
+      // ===== ===== ===== =====   ===== ===== ===== =====
+      // = 8 = = 7 = = 6 = = 5 =   = 4 = = 3 = = 2 = = 1 =
+      // ===== ===== ===== =====   ===== ===== ===== =====
+
       for (var off = 0; off < _buffer.byteLength; off += 8) {
-        high = data.getInt32(off, true)
-        low = data.getInt32(off + 4, true)
+        // high and low intentionally swapped
+        low = data.getInt32(off, true)
+        high = data.getInt32(off + 4, true)
         sum = sum.add(Long.fromBits(low, high, true))
       }
       return sum
