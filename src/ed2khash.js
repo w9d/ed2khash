@@ -1,6 +1,7 @@
 /* eslint-env browser */
 /* global goog */
 goog.provide('ed2khash')
+goog.require('dcodeio.Long')
 
 var ed2khash = function () {
   'use strict'
@@ -53,6 +54,9 @@ var ed2khash = function () {
     var busy_read = false
     var busy_work = false
     var md4_list = []
+    var mpc_start = null
+    var mpc_end = null
+    var mpcsum = Long.fromBits(0, 0, true)
     var delay_work = []
 
     die = false
@@ -98,13 +102,45 @@ var ed2khash = function () {
         busy_read = true
         queue += 1
         reader.readAsArrayBuffer(file.slice(offset, offset + 9728000))
-      } else if (!busy_read && !busy_work && queue === 0) {
+      } else if (!busy_read && !busy_work && queue === 0 && (!mpc_start || !mpc_end)) {
+        mpcHandleReading()
+      } else if (mpc_start && mpc_end) {
         finishProcessingFile()
+      }
+    }
+
+    function mpcHandleReading () {
+      if (busy_read) {
+        console.error('this should not happen')
+        return
+      }
+      if (!mpc_start) {
+        reader.onload = evt => {
+          mpc_start = evt.target.result
+          busy_read = false
+          process()
+        }
+        busy_read = true
+        reader.readAsArrayBuffer(file.slice(0, Math.min(65536, file.size)))
+      } else if (!mpc_end) {
+        reader.onload = evt => {
+          mpc_end = evt.target.result
+          busy_read = false
+          process()
+        }
+        busy_read = true
+        reader.readAsArrayBuffer(file.slice(Math.max(file.size - 65536, 0), file.size))
       }
     }
 
     function finishProcessingFile () {
       total_processed += file.size
+
+      mpcsum = mpcsum.add(Long.fromNumber(file.size, true))
+      mpcsum = mpcsum.add(mpcUpdate(mpc_start))
+      mpcsum = mpcsum.add(mpcUpdate(mpc_end))
+      console.log('si=' + mpcsum.toString())
+
       if (md4_list.length === 1) {
         deferFileCompleteCallbackNF(file, md4_list[0])
         return
@@ -128,6 +164,10 @@ var ed2khash = function () {
         console.log('worker delay for each chunk in ms=' + delay_work.join(', '))
     }
 
+    /**
+     * @param {number} index
+     * @return {undefined}
+     */
     function deferProgressCallback (index) {
       if (prop['onprogress']) {
         var tmp_file = fileoffset
@@ -138,6 +178,23 @@ var ed2khash = function () {
             total_multiplier * (tmp_total_processed + (index + 1) * 9728000))
         }, 25)
       }
+    }
+
+    /**
+     * @param {ArrayBuffer} _buffer
+     * @return {Long}
+     */
+    function mpcUpdate (_buffer) {
+      var data = new DataView(_buffer)
+      var sum = Long.fromBits(0, 0, true)
+      var high = null
+      var low = null
+      for (var off = 0; off < _buffer.byteLength; off += 8) {
+        high = data.getInt32(off, true)
+        low = data.getInt32(off + 4, true)
+        sum = sum.add(Long.fromBits(low, high, true))
+      }
+      return sum
     }
 
     deferProgressCallback(-1)
