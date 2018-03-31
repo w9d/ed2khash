@@ -166,7 +166,6 @@ var ed2khash = function () {
 
     /**
      * @param {number} index
-     * @return {undefined}
      */
     function deferProgressCallback (index) {
       if (prop['onprogress']) {
@@ -181,8 +180,7 @@ var ed2khash = function () {
     }
 
     /**
-     * @param {ArrayBuffer} _buffer
-     * @return {Long}
+     * @param {!ArrayBuffer} _buffer
      */
     function mpcUpdate (_buffer) {
       var data = new DataView(_buffer)
@@ -205,6 +203,9 @@ var ed2khash = function () {
     return busy === true
   }
 
+  /**
+   * @param {Array<File>} _files
+   */
   function execute (_files) {
     if (busy) {
       console.error('currently busy processing')
@@ -237,6 +238,10 @@ var ed2khash = function () {
     }
   }
 
+  /**
+   * @param {!ArrayBuffer} arr
+   * @return {!string}
+   */
   function arrayBufferToHexDigest (arr) {
     // taken from js-md4
     var HEX_CHARS = '0123456789abcdef'.split('')
