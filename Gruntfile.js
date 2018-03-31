@@ -57,7 +57,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build-rel', ['shell:clean:rel',
     'shell:closure_md4:ADVANCED:rel', 'shell:closure_ed2khash:ADVANCED:rel'])
   grunt.registerTask('build-test', ['shell:clean:test',
-    'shell:closure_md4:BUNDLE:test', 'shell:closure_ed2khash:BUNDLE:test'])
+    'shell:closure_md4:WHITESPACE:test', 'shell:closure_ed2khash:WHITESPACE:test'])
 
   grunt.registerTask('build', ['build-rel'])
   grunt.registerTask('build-release', ['build-rel'])
