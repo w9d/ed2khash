@@ -21,91 +21,100 @@ const com = require('./common.js')
 const ed2k = require('../build-rel/ed2khash.min.js')
 
 test('1 file 1 chunk-1 zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 9727999)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 9727999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, 'ac44b93fc9aff773ab0005c911f8396f')
+    t.equal(_hash.mpc, '0000000000946fff')
   }
   a.execute([f])
 })
 
 test('1 file 1 chunk zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 9728000)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 9728000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, 'fc21d9af828f92a8df64beac3357425d')
+    t.equal(_hash.mpc, '0000000000947000')
   }
   a.execute([f])
 })
 
 test('1 file 1 chunk+1 zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 9728001)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 9728001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, '06329e9dba1373512c06386fe29e3c65')
+    t.equal(_hash.mpc, '0000000000947001')
   }
   a.execute([f])
 })
 
 test('1 file 2 chunks-1 zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 19455999)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 19455999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, 'a4aed104a077de7e4210e7f5b131fe25')
+    t.equal(_hash.mpc, '000000000128dfff')
   }
   a.execute([f])
 })
 
 test('1 file 2 chunks zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 19456000)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 19456000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, '114b21c63a74b6ca922291a11177dd5c')
+    t.equal(_hash.mpc, '000000000128e000')
   }
   a.execute([f])
 })
 
 test('1 file 2 chunks+1 zeros', function (t) {
-  t.plan(1)
-  var f = new com.GenFile(com.genZero, 19456001)
+  t.plan(2)
+  var f = com.GenFile(com.genZero, 19456001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, 'e57f824d28f69fe90864e17673668457')
+    t.equal(_hash.mpc, '000000000128e001')
   }
   a.execute([f])
 })
 
 test('1 file 1 chunk-1 random', function (t) {
-  t.plan(1)
+  t.plan(2)
   var f = com.GenFile(com.genRand, 9727999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, '4b3edce7128daee5acf803ef4b14004d')
+    t.equal(_hash.mpc, 'bea62fa9a41ad3cb')
   }
   a.execute([f])
 })
 
 test('1 file 1 chunk random', function (t) {
-  t.plan(1)
+  t.plan(2)
   var f = com.GenFile(com.genRand, 9728000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, 'df1ad062dc5b2b213288f722c0d683b9')
+    t.equal(_hash.mpc, 'f076768b31fb40e8')
   }
   a.execute([f])
 })
 
 test('1 file 1 chunk+1 random', function (t) {
-  t.plan(1)
+  t.plan(2)
   var f = com.GenFile(com.genRand, 9728001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
     t.equal(_hash.ed2k, '74c23c0baeef195a01c5b28aa19b48de')
+    t.equal(_hash.mpc, 'f6a846d213892159')
   }
   a.execute([f])
 })
@@ -183,13 +192,14 @@ test('standard run', function (t) {
   var f = [com.GenFile(com.genRand, 14592123, {name: 't1.mp4', seed: 1291769473}),
     com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
-  var info = [ { name: 't1.mp4', size: 14592123, hash: '25250410dc9672f15e5f37c96f2969b9' },
-    { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' },
-    { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
-    { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
+  var info = [ { name: 't1.mp4', size: 14592123, ed2k: '25250410dc9672f15e5f37c96f2969b9', mpc: 'f6182595a7c84b09' },
+    { name: 't2.mp4', size: 33075212, ed2k: '3dfca2c114476e2c3a993007b3568f1b', mpc: 'f33912f3ee42c1f9' },
+    { name: 't3.mp4', size: 24324321, ed2k: '4e020dfd7f784b490b23ba85fadbc9f3', mpc: '273370ab39fabc0b' },
+    { name: 'NEVERHAPPENF', size: 1099511627776, ed2k: 'NEVERHAPPENH', mpc: 'NEVERHAPPENH' }]
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    if (info[count].hash === _hash.ed2k &&
+    if (info[count].ed2k === _hash.ed2k &&
+      info[count].mpc === _hash.mpc &&
       info[count].name === _file.name &&
       info[count].size === _file.size)
       good++
@@ -218,13 +228,14 @@ test('standard run reuse', function (t) {
   var f = [com.GenFile(com.genRand, 14592123, {name: 't1.mp4', seed: 1291769473}),
     com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
-  var info = [ { name: 't1.mp4', size: 14592123, hash: '25250410dc9672f15e5f37c96f2969b9' },
-    { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' },
-    { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
-    { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
+  var info = [ { name: 't1.mp4', size: 14592123, ed2k: '25250410dc9672f15e5f37c96f2969b9', mpc: 'f6182595a7c84b09' },
+    { name: 't2.mp4', size: 33075212, ed2k: '3dfca2c114476e2c3a993007b3568f1b', mpc: 'f33912f3ee42c1f9' },
+    { name: 't3.mp4', size: 24324321, ed2k: '4e020dfd7f784b490b23ba85fadbc9f3', mpc: '273370ab39fabc0b' },
+    { name: 'NEVERHAPPENF', size: 1099511627776, ed2k: 'NEVERHAPPENH', mpc: 'NEVERHAPPENH' }]
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    if (info[good].hash === _hash.ed2k &&
+    if (info[good].ed2k === _hash.ed2k &&
+      info[good].mpc === _hash.mpc &&
       info[good].name === _file.name &&
       info[good].size === _file.size)
       good++
@@ -257,14 +268,15 @@ test('standard run reuse guard', function (t) {
   var finish = 0
   var f = [com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
-  var info = { name: 't2.mp4', size: 33075212, hash: '3dfca2c114476e2c3a993007b3568f1b' }
+  var info = { name: 't2.mp4', size: 33075212, ed2k: '3dfca2c114476e2c3a993007b3568f1b', mpc: 'f33912f3ee42c1f9' }
   var a = ed2k.ed2khash()
   a.onprogress = function () {
     if (++progess_count === 3)
       a.execute([f[1]])
   }
   a.onfilecomplete = function (_file, _hash) {
-    if (info.hash === _hash.ed2k &&
+    if (info.ed2k === _hash.ed2k &&
+      info.mpc === _hash.mpc &&
       info.name === _file.name &&
       info.size === _file.size)
       good++
