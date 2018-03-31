@@ -135,30 +135,32 @@ var ed2khash = function () {
     }
 
     function finishProcessingFile () {
+      var hashes = {}
       total_processed += file.size
 
       mpcsum = mpcsum.add(Long.fromNumber(file.size, true))
       mpcsum = mpcsum.add(mpcUpdate(mpc_start))
       mpcsum = mpcsum.add(mpcUpdate(mpc_end))
-      console.log('si=' + mpcsum.toString(16).padStart(16, '0'))
+      hashes['mpc'] = mpcsum.toString(16).padStart(16, '0')
 
       if (md4_list.length === 1) {
-        deferFileCompleteCallbackNF(file, md4_list[0])
+        hashes['ed2k'] = arrayBufferToHexDigest(md4_list[0])
+        deferFileCompleteCallbackNF(file, hashes)
         return
       }
 
       // calculate final hash...
       md4_worker.onmessage = function (e) {
-        deferFileCompleteCallbackNF(file, e.data['h'])
+        hashes['ed2k'] = arrayBufferToHexDigest(e.data['h'])
+        deferFileCompleteCallbackNF(file, hashes)
       }
       md4_worker.postMessage({'f': true, 'hl': md4_list})
       die = true
     }
 
-    function deferFileCompleteCallbackNF (_file, _hashArrayBuffer) {
+    function deferFileCompleteCallbackNF (_file, _hashes) {
       if (prop['onfilecomplete']) {
-        setTimeout(prop['onfilecomplete'], 1, _file,
-          arrayBufferToHexDigest(_hashArrayBuffer))
+        setTimeout(prop['onfilecomplete'], 1, _file, _hashes)
       }
       processNextFile()
       if (goog.DEBUG)

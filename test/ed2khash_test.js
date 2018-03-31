@@ -25,7 +25,7 @@ test('1 file 1 chunk-1 zeros', function (t) {
   var f = new com.GenFile(com.genZero, 9727999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, 'ac44b93fc9aff773ab0005c911f8396f')
+    t.equal(_hash.ed2k, 'ac44b93fc9aff773ab0005c911f8396f')
   }
   a.execute([f])
 })
@@ -35,7 +35,7 @@ test('1 file 1 chunk zeros', function (t) {
   var f = new com.GenFile(com.genZero, 9728000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, 'fc21d9af828f92a8df64beac3357425d')
+    t.equal(_hash.ed2k, 'fc21d9af828f92a8df64beac3357425d')
   }
   a.execute([f])
 })
@@ -45,7 +45,7 @@ test('1 file 1 chunk+1 zeros', function (t) {
   var f = new com.GenFile(com.genZero, 9728001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, '06329e9dba1373512c06386fe29e3c65')
+    t.equal(_hash.ed2k, '06329e9dba1373512c06386fe29e3c65')
   }
   a.execute([f])
 })
@@ -55,7 +55,7 @@ test('1 file 2 chunks-1 zeros', function (t) {
   var f = new com.GenFile(com.genZero, 19455999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, 'a4aed104a077de7e4210e7f5b131fe25')
+    t.equal(_hash.ed2k, 'a4aed104a077de7e4210e7f5b131fe25')
   }
   a.execute([f])
 })
@@ -65,7 +65,7 @@ test('1 file 2 chunks zeros', function (t) {
   var f = new com.GenFile(com.genZero, 19456000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, '114b21c63a74b6ca922291a11177dd5c')
+    t.equal(_hash.ed2k, '114b21c63a74b6ca922291a11177dd5c')
   }
   a.execute([f])
 })
@@ -75,7 +75,7 @@ test('1 file 2 chunks+1 zeros', function (t) {
   var f = new com.GenFile(com.genZero, 19456001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, 'e57f824d28f69fe90864e17673668457')
+    t.equal(_hash.ed2k, 'e57f824d28f69fe90864e17673668457')
   }
   a.execute([f])
 })
@@ -85,7 +85,7 @@ test('1 file 1 chunk-1 random', function (t) {
   var f = com.GenFile(com.genRand, 9727999)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, '4b3edce7128daee5acf803ef4b14004d')
+    t.equal(_hash.ed2k, '4b3edce7128daee5acf803ef4b14004d')
   }
   a.execute([f])
 })
@@ -95,7 +95,7 @@ test('1 file 1 chunk random', function (t) {
   var f = com.GenFile(com.genRand, 9728000)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, 'df1ad062dc5b2b213288f722c0d683b9')
+    t.equal(_hash.ed2k, 'df1ad062dc5b2b213288f722c0d683b9')
   }
   a.execute([f])
 })
@@ -105,7 +105,7 @@ test('1 file 1 chunk+1 random', function (t) {
   var f = com.GenFile(com.genRand, 9728001)
   var a = ed2k.ed2khash()
   a.onfilecomplete = function (_file, _hash) {
-    t.equal(_hash, '74c23c0baeef195a01c5b28aa19b48de')
+    t.equal(_hash.ed2k, '74c23c0baeef195a01c5b28aa19b48de')
   }
   a.execute([f])
 })
@@ -188,8 +188,8 @@ test('standard run', function (t) {
     { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
     { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
   var a = ed2k.ed2khash()
-  a.onfilecomplete = function (_file, _ed2khash) {
-    if (info[count].hash === _ed2khash &&
+  a.onfilecomplete = function (_file, _hash) {
+    if (info[count].hash === _hash.ed2k &&
       info[count].name === _file.name &&
       info[count].size === _file.size)
       good++
@@ -223,8 +223,8 @@ test('standard run reuse', function (t) {
     { name: 't3.mp4', size: 24324321, hash: '4e020dfd7f784b490b23ba85fadbc9f3' },
     { name: 'NEVERHAPPENF', size: 1099511627776, hash: 'NEVERHAPPENH' }]
   var a = ed2k.ed2khash()
-  a.onfilecomplete = function (_file, _ed2khash) {
-    if (info[good].hash === _ed2khash &&
+  a.onfilecomplete = function (_file, _hash) {
+    if (info[good].hash === _hash.ed2k &&
       info[good].name === _file.name &&
       info[good].size === _file.size)
       good++
@@ -263,8 +263,8 @@ test('standard run reuse guard', function (t) {
     if (++progess_count === 3)
       a.execute([f[1]])
   }
-  a.onfilecomplete = function (_file, _ed2khash) {
-    if (info.hash === _ed2khash &&
+  a.onfilecomplete = function (_file, _hash) {
+    if (info.hash === _hash.ed2k &&
       info.name === _file.name &&
       info.size === _file.size)
       good++
@@ -298,7 +298,7 @@ test('standard run isbusy', function (t) {
     // 4 executions second
     t.equal(a.isbusy(), true)
   }
-  a.onfilecomplete = function (_file, _ed2khash) {
+  a.onfilecomplete = function (_file, _hash) {
     if (++progess_count === 1)
       t.equal(a.isbusy(), true)
     else
