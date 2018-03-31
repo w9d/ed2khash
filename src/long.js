@@ -1,4 +1,4 @@
-module.exports = Long;
+goog.provide('dcodeio.Long')
 
 /**
  * wasm optimizations, to do native i64 multiplication and divide
