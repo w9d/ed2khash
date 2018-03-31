@@ -82,6 +82,7 @@ var ed2khash = function () {
     function process () {
       if (die) {
         busy = false
+        console.error('this should only happen during terminate')
         return
       }
       if (goog.DEBUG) {
