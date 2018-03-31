@@ -139,7 +139,7 @@ var ed2khash = function () {
       mpcsum = mpcsum.add(Long.fromNumber(file.size, true))
       mpcsum = mpcsum.add(mpcUpdate(mpc_start))
       mpcsum = mpcsum.add(mpcUpdate(mpc_end))
-      console.log('si=' + mpcsum.toString())
+      console.log('si=' + mpcsum.toString(16).padStart(16, '0'))
 
       if (md4_list.length === 1) {
         deferFileCompleteCallbackNF(file, md4_list[0])
