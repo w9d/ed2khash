@@ -1,4 +1,4 @@
-goog.provide('dcodeio.Long')
+module.exports = Long;
 
 /**
  * wasm optimizations, removed
