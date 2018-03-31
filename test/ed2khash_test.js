@@ -288,12 +288,14 @@ test('standard run reuse guard', function (t) {
 })
 
 test('standard run isbusy', function (t) {
-  t.plan(13)
+  t.plan(14)
   var progess_count = 0
   var f = [com.GenFile(com.genRand, 33075212, {name: 't2.mp4', seed: 220482059}),
     com.GenFile(com.genRand, 24324321, {name: 't3.mp4', seed: 1283955684})]
   var a = ed2k.ed2khash()
   a.onprogress = function () {
+    // 5 executions first
+    // 4 executions second
     t.equal(a.isbusy(), true)
   }
   a.onfilecomplete = function (_file, _ed2khash) {

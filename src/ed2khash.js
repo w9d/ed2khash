@@ -175,7 +175,7 @@ var ed2khash = function () {
           prop['onprogress'](file,
             multipliers[tmp_file] * (index + 1) * 9728000,
             total_multiplier * (tmp_total_processed + (index + 1) * 9728000))
-        }, 25)
+        }, 1)
       }
     }
 
