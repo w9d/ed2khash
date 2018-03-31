@@ -26,7 +26,7 @@
     select_pfiles.value = _total_files;
   }
   var ed2k_file_done = function (f, sum) {
-    ed2k_text.value += '|' + f.name + '|' + f.size + '|' + sum.ed2k + '|\n';
+    ed2k_text.value += f.name + '\t' + f.size + '\t' + sum.mpc + '\t' + sum.ed2k + '\n';
   }
   var ed2khasher = ed2khash();
   ed2khasher.onprogress = ed2k_progress;
