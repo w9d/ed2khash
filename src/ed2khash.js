@@ -12,10 +12,11 @@ var ed2khash = function () {
     'onerror': null,
     'isbusy': isbusy,
     'execute': execute,
-    'terminate': terminate
+    'terminate': terminate,
+    'setworker': setworker
   }
   var reader = new FileReader()
-  var md4_worker = new Worker('md4-worker.min.js')
+  var md4_worker = null
 
   var files = null
   var fileoffset = -1
@@ -27,14 +28,6 @@ var ed2khash = function () {
   var total_processed = 0
   var multipliers = []
 
-  md4_worker.onerror = function (e) {
-    die = true
-    console.error('web worker error', e)
-    if (prop['onerror']) {
-      setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
-        ' Web Worker. The error is...\n\n' + e.message })
-    }
-  }
   reader.onerror = function (evt) {
     die = true
     console.error('read error', evt.target)
@@ -232,6 +225,8 @@ var ed2khash = function () {
       console.error('currently busy processing')
       return
     }
+    if (!md4_worker)
+      setworker(new Worker('md4-worker.min.js'))
     files = _files
     total_size = files.reduce(function (a, b) { return a + b.size }, 0)
     total_multiplier = 1 / total_size
@@ -246,6 +241,23 @@ var ed2khash = function () {
 
   function terminate () {
     die = true
+  }
+
+  /**
+   * @param {!Worker} md4_worker_
+   */
+  function setworker (md4_worker_) {
+    if (md4_worker)
+      return
+    md4_worker = md4_worker_
+    md4_worker.onerror = function (e) {
+      die = true
+      console.error('web worker error', e)
+      if (prop['onerror']) {
+        setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
+          ' Web Worker. The error is...\n\n' + e.message })
+      }
+    }
   }
 
   function processNextFile () {
