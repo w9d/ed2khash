@@ -179,6 +179,7 @@ var ed2khash = function () {
      * @param {!ArrayBuffer} _buffer
      */
     function mpcUpdate (_buffer) {
+      var length = _buffer.byteLength
       var data = new DataView(_buffer)
       var sum = Long.fromBits(0, 0, true)
       var high = null
@@ -200,10 +201,21 @@ var ed2khash = function () {
       // = 8 = = 7 = = 6 = = 5 =   = 4 = = 3 = = 2 = = 1 =
       // ===== ===== ===== =====   ===== ===== ===== =====
 
-      for (var off = 0; off < _buffer.byteLength; off += 8) {
+      for (var off = 0; off < length; off += 8) {
         // high and low intentionally swapped
-        low = data.getInt32(off, true)
-        high = data.getInt32(off + 4, true)
+        try {
+          low = data.getInt32(off, true)
+          high = data.getInt32(off + 4, true)
+        } catch (e) {
+          if (e instanceof RangeError) {
+            // When file is less than 65536 bytes and not a multiple of 8 using
+            // DataView.getInt32 results in RangeError.
+            low = 0
+            high = 0
+          } else {
+            throw e
+          }
+        }
         sum = sum.add(Long.fromBits(low, high, true))
       }
       return sum

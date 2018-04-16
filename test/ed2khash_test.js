@@ -323,3 +323,163 @@ test('standard run isbusy', function (t) {
   a.execute(f)
   t.equal(a.isbusy(), true)
 })
+
+test('mpc 0', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '31d6cfe0d16ae931b73c59d7e0c089c0')
+    t.equal(_hash.mpc, '0000000000000000')
+  }
+  a.execute([com.GenFile(com.genZero, 0)])
+})
+
+test('mpc 1', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, 'be116c44d91edb8aece404982b305a11')
+    t.equal(_hash.mpc, '0000000000000001')
+  }
+  a.execute([com.GenFile(com.genRand, 1, {seed: 1173245347})])
+})
+
+test('mpc 2', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '908e85552d246063cd50a2f74da9a666')
+    t.equal(_hash.mpc, '0000000000000002')
+  }
+  a.execute([com.GenFile(com.genRand, 2, {seed: 1173245347})])
+})
+
+test('mpc 3', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, 'e59af37cd61e68dee2ec7e6064c774e7')
+    t.equal(_hash.mpc, '0000000000000003')
+  }
+  a.execute([com.GenFile(com.genRand, 3, {seed: 1173245347})])
+})
+
+test('mpc 4', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '085761fa4dd8432d3fae77b9ba6a2723')
+    t.equal(_hash.mpc, '0000000000000004')
+  }
+  a.execute([com.GenFile(com.genRand, 4, {seed: 1173245347})])
+})
+
+test('mpc 5', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '85b45116423db9ea2762369a6c8684ad')
+    t.equal(_hash.mpc, '0000000000000005')
+  }
+  a.execute([com.GenFile(com.genRand, 5, {seed: 1173245347})])
+})
+
+test('mpc 6', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '2bcd4b171b40708f3e1564710798be1c')
+    t.equal(_hash.mpc, '0000000000000006')
+  }
+  a.execute([com.GenFile(com.genRand, 6, {seed: 1173245347})])
+})
+
+test('mpc 7', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, 'f0fdfadb9baf91da6aa56cfb02da772d')
+    t.equal(_hash.mpc, '0000000000000007')
+  }
+  a.execute([com.GenFile(com.genRand, 7, {seed: 1173245347})])
+})
+
+test('mpc 8', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '7679ef2b26de9557cf04fc355e2b002e')
+    t.equal(_hash.mpc, 'd723b862a2ec688e')
+  }
+  a.execute([com.GenFile(com.genRand, 8, {seed: 1173245347})])
+})
+
+test('mpc 9', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, 'a6853339514dd4ec6436185b8db4207f')
+    t.equal(_hash.mpc, 'd723b862a2ec688f')
+  }
+  a.execute([com.GenFile(com.genRand, 9, {seed: 1173245347})])
+})
+
+test('mpc 15', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '80d9da4fd0436f1eb0e51f1dcaf85aa7')
+    t.equal(_hash.mpc, 'd723b862a2ec6895')
+  }
+  a.execute([com.GenFile(com.genRand, 15, {seed: 1173245347})])
+})
+
+test('mpc 16', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '163416e088e6df2126e276ff0bf0624a')
+    t.equal(_hash.mpc, 'd1a6494775088f4e')
+  }
+  a.execute([com.GenFile(com.genRand, 16, {seed: 1173245347})])
+})
+
+test('mpc 65534', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '4dce0705879ba5bd79ce1a6d86950d47')
+    t.equal(_hash.mpc, '6ac00ee93545bd90')
+  }
+  a.execute([com.GenFile(com.genRand, 65534, {seed: 1173245347})])
+})
+
+test('mpc 65535', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '3e52ba92e1afa6f5868252a1d3070fd2')
+    t.equal(_hash.mpc, '6ac00ee93545bd91')
+  }
+  a.execute([com.GenFile(com.genRand, 65535, {seed: 1173245347})])
+})
+
+test('mpc 65536', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '49f5574ed6c1a0609f9550ee7e7257cb')
+    t.equal(_hash.mpc, '22872ee87dee7e66')
+  }
+  a.execute([com.GenFile(com.genRand, 65536, {seed: 1173245347})])
+})
+
+test('mpc 65537', function(t) {
+  t.plan(2)
+  var a = ed2k.ed2khash()
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, '39f6c14db298be04422cda6dd3dbcdaa')
+    t.equal(_hash.mpc, '1954db0bb336a5f9')
+  }
+  a.execute([com.GenFile(com.genRand, 65537, {seed: 1173245347})])
+})
