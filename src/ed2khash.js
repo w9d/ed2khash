@@ -78,10 +78,10 @@ var ed2khash = function () {
         console.error('this should only happen during terminate')
         return
       }
-      if (goog.DEBUG) {
-        console.log('status: ' + offset + '/' + file.size + ' read=' +
-          busy_read + ' work=' + busy_work + ' queue=' + queue)
-      }
+      //if (goog.DEBUG) {
+      //  console.log('status: ' + offset + '/' + file.size + ' read=' +
+      //    busy_read + ' work=' + busy_work + ' queue=' + queue)
+      //}
 
       if (queue > 0 && chunks_i.length > 0 && !busy_work) {
         var index = chunks_i.shift()
