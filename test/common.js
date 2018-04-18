@@ -25,6 +25,15 @@ var genRand = function (size, seed) {
   return buffer.buffer
 }
 
+var genText = function (size, seed) {
+  var length = seed.length
+  var buffer = new Uint8Array(length)
+  for (var i = 0, c; c = seed.charCodeAt(i); i++) {
+    buffer[i] = c
+  }
+  return buffer.buffer
+}
+
 var GenFile = function (generator, size, options) {
   var opt = options || {}
   var file
@@ -41,5 +50,6 @@ var GenFile = function (generator, size, options) {
 module.exports = {
   genZero: genZero,
   genRand: genRand,
+  genText: genText,
   GenFile: GenFile
 }

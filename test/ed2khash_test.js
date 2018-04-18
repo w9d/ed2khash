@@ -483,3 +483,30 @@ test('mpc 65537', function(t) {
   }
   a.execute([com.GenFile(com.genRand, 65537, {seed: 1173245347})])
 })
+
+test('md4 clean env', function(t) {
+  t.plan(6)
+  var a = ed2k.ed2khash()
+  var f = [
+    com.GenFile(com.genText, 0, {seed: ''}),
+    com.GenFile(com.genText, 0, {seed: 'The quick brown fox jumps over the lazy dog'}),
+    com.GenFile(com.genText, 0, {seed: 'The quick brown fox jumps over the lazy dog.'}),
+    com.GenFile(com.genText, 0, {seed: 'The MD5 message-digest algorithm is a widely used cryptographic hash function producing a 128-bit (16-byte) hash value, typically expressed in text format as a 32 digit hexadecimal number. MD5 has been utilized in a wide variety of cryptographic applications, and is also commonly used to verify data integrity.'}),
+    com.GenFile(com.genText, 0, {seed: '0123456780123456780123456780123456780123456780123456780'}),
+    com.GenFile(com.genText, 0, {seed: '01234567801234567801234567801234567801234567801234567801'})
+  ]
+  var hashes = [
+    '31d6cfe0d16ae931b73c59d7e0c089c0',
+    '1bee69a46ba811185c194762abaeae90',
+    '2812c6c7136898c51f6f6739ad08750e',
+    'e995876fc5a7870c478d20312edf17da',
+    '91df808c37b8c5544391a3aa2196114e',
+    '3825a0afe234b8029ccad9a31ec5f8ee'
+  ]
+  var i = 0
+  a.onfilecomplete = function(_file, _hash) {
+    t.equal(_hash.ed2k, hashes[i])
+    i++
+  }
+  a.execute(f)
+})
