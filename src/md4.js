@@ -13,7 +13,7 @@ goog.provide('emn178.jsmd4')
  */
 /*jslint bitwise: true */
 /**
- * @method md4
+ * @method md4
  * @description MD4 hash function, export to global in browsers.
  * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
  * @returns {String} md4 hashes
@@ -22,128 +22,20 @@ goog.provide('emn178.jsmd4')
  * md4('The quick brown fox jumps over the lazy dog'); // 1bee69a46ba811185c194762abaeae90
  * md4('The quick brown fox jumps over the lazy dog.'); // 2812c6c7136898c51f6f6739ad08750e
  *
- * // It also supports UTF-8 encoding
- * md4('中文'); // 223088bf7bd45a16436b15360c5fc5a0
- *
- * // It also supports byte `Array`, `Uint8Array`, `ArrayBuffer`
+ * // It supports byte `Array`, `Uint8Array`, `ArrayBuffer`
  * md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0
  * md4(new Uint8Array([])); // 31d6cfe0d16ae931b73c59d7e0c089c0
  */
-var md4 = (function () {
+var md4 = (function (root) {
   'use strict';
 
-  var WINDOW = typeof window === 'object';
-  var root = WINDOW ? window : {};
-  if (root.JS_MD4_NO_WINDOW) {
-    WINDOW = false;
-  }
-  var WEB_WORKER = !WINDOW && typeof self === 'object';
-  var NODE_JS = false;
-  if (WEB_WORKER) {
-    root = self;
-  }
-  var COMMON_JS = false;
-  var AMD = false;
-  var ARRAY_BUFFER = typeof ArrayBuffer !== 'undefined';
   var HEX_CHARS = '0123456789abcdef'.split('');
   var EXTRA = [128, 32768, 8388608, -2147483648];
   var SHIFT = [0, 8, 16, 24];
-  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'buffer', 'arrayBuffer'];
 
-  var blocks = [], buffer8;
-  if (ARRAY_BUFFER) {
-    var buffer = new ArrayBuffer(68);
-    buffer8 = new Uint8Array(buffer);
-    blocks = new Uint32Array(buffer);
-  }
-
-  /**
-   * @method hex
-   * @memberof md4
-   * @description Output hash as hex string
-   * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {String} Hex string
-   * @example
-   * md4.hex('The quick brown fox jumps over the lazy dog');
-   * // equal to
-   * md4('The quick brown fox jumps over the lazy dog');
-   */
-  /**
-   * @method digest
-   * @memberof md4
-   * @description Output hash as bytes array
-   * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {Array} Bytes array
-   * @example
-   * md4.digest('The quick brown fox jumps over the lazy dog');
-   */
-  /**
-   * @method array
-   * @memberof md4
-   * @description Output hash as bytes array
-   * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {Array} Bytes array
-   * @example
-   * md4.array('The quick brown fox jumps over the lazy dog');
-   */
-  /**
-   * @method buffer
-   * @memberof md4
-   * @description Output hash as ArrayBuffer
-   * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {ArrayBuffer} ArrayBuffer
-   * @example
-   * md4.buffer('The quick brown fox jumps over the lazy dog');
-   */
-  /**
-   * @method createOutputMethod
-   * @param {!string} outputType
-   * @returns {!function((String|Array|Uint8Array|ArrayBuffer)): !Md4}
-   */
-  var createOutputMethod = function (outputType) {
-    return function(message) {
-      return new Md4(true).update(message)[outputType]();
-    }
-  };
-
-  /**
-   * @method create
-   * @memberof md4
-   * @description Create Md4 object
-   * @returns {Md4} MD4 object.
-   * @example
-   * var hash = md4.create();
-   */
-  /**
-   * @method update
-   * @memberof md4
-   * @description Create and update Md4 object
-   * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {Md4} MD4 object.
-   * @example
-   * var hash = md4.update('The quick brown fox jumps over the lazy dog');
-   * // equal to
-   * var hash = md4.create();
-   * hash.update('The quick brown fox jumps over the lazy dog');
-   */
-  /**
-   * @method createMethod
-   * @returns {!function((String|Array|Uint8Array|ArrayBuffer)): !Md4}
-   */
-  var createMethod = function () {
-    var method = createOutputMethod('hex');
-    method.create = function () {
-      return new Md4(undefined);
-    };
-    method.update = function (message) {
-      return method.create().update(message);
-    };
-    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
-      var type = OUTPUT_TYPES[i];
-      method[type] = createOutputMethod(type);
-    }
-    return method;
-  };
+  var buffer = new ArrayBuffer(68);
+  var buffer8 = new Uint8Array(buffer);
+  var blocks = new Uint32Array(buffer);
 
   /**
    * Md4 class
@@ -152,7 +44,7 @@ var md4 = (function () {
    * @description This is internal class.
    * @see {@link md4.create}
    */
-  function Md4(sharedMemory) {
+  var Md4 = function (sharedMemory) {
     if (sharedMemory) {
       blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] =
       blocks[4] = blocks[5] = blocks[6] = blocks[7] =
@@ -161,13 +53,9 @@ var md4 = (function () {
       this.blocks = blocks;
       this.buffer8 = buffer8;
     } else {
-      if (ARRAY_BUFFER) {
-        var buffer = new ArrayBuffer(68);
-        this.buffer8 = new Uint8Array(buffer);
-        this.blocks = new Uint32Array(buffer);
-      } else {
-        this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      }
+      var buffer = new ArrayBuffer(68);
+      this.buffer8 = new Uint8Array(buffer);
+      this.blocks = new Uint32Array(buffer);
     }
     this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = 0;
     this.finalized = this.hashed = false;
@@ -187,11 +75,18 @@ var md4 = (function () {
     if (this.finalized) {
       return;
     }
-    var notString = typeof message !== 'string';
-    if (notString && ARRAY_BUFFER && message instanceof ArrayBuffer) {
+    if (message instanceof ArrayBuffer) {
       message = new Uint8Array(message);
+    } else if (message instanceof Uint8Array) {
+    } else if (typeof message === 'string') {
+      var length = message.length
+      var output = new Uint8Array(length)
+      for (var i = 0; i < length; i++) {
+        output[i] = message.charCodeAt(i)
+      }
+      message = output
     }
-    var code, index = 0, i, length = message.length || 0, blocks = this.blocks;
+    var index = 0, i, length = message.length || 0, blocks = this.blocks;
     var buffer8 = this.buffer8;
 
     while (index < length) {
@@ -204,59 +99,10 @@ var md4 = (function () {
         blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
       }
 
-      if (notString) {
-        if (ARRAY_BUFFER) {
-          for (i = this.start; index < length && i < 64; ++index) {
-            buffer8[i++] = message[index];
-          }
-        } else {
-          for (i = this.start; index < length && i < 64; ++index) {
-            blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
-          }
-        }
-      } else {
-        if (ARRAY_BUFFER) {
-          for (i = this.start; index < length && i < 64; ++index) {
-            code = message.charCodeAt(index);
-            if (code < 0x80) {
-              buffer8[i++] = code;
-            } else if (code < 0x800) {
-              buffer8[i++] = 0xc0 | (code >> 6);
-              buffer8[i++] = 0x80 | (code & 0x3f);
-            } else if (code < 0xd800 || code >= 0xe000) {
-              buffer8[i++] = 0xe0 | (code >> 12);
-              buffer8[i++] = 0x80 | ((code >> 6) & 0x3f);
-              buffer8[i++] = 0x80 | (code & 0x3f);
-            } else {
-              code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
-              buffer8[i++] = 0xf0 | (code >> 18);
-              buffer8[i++] = 0x80 | ((code >> 12) & 0x3f);
-              buffer8[i++] = 0x80 | ((code >> 6) & 0x3f);
-              buffer8[i++] = 0x80 | (code & 0x3f);
-            }
-          }
-        } else {
-          for (i = this.start; index < length && i < 64; ++index) {
-            code = message.charCodeAt(index);
-            if (code < 0x80) {
-              blocks[i >> 2] |= code << SHIFT[i++ & 3];
-            } else if (code < 0x800) {
-              blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            } else if (code < 0xd800 || code >= 0xe000) {
-              blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            } else {
-              code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
-              blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-              blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-            }
-          }
-        }
+      for (i = this.start; index < length && i < 64; ++index) {
+        buffer8[i++] = message[index];
       }
+
       this.lastByteIndex = i;
       this.bytes += i - this.start;
       if (i >= 64) {
@@ -559,5 +405,63 @@ var md4 = (function () {
    */
   Md4.prototype.buffer = Md4.prototype.arrayBuffer;
 
-  return createMethod();
-})();
+  //
+  // Static functions.
+  //
+  /**
+   * @returns {Md4}
+   */
+  Md4.create = function() {
+    return new Md4(false)
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {(Md4|undefined)}
+   */
+  Md4.update = function(message) {
+    return Md4.create().update(message)
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {string}
+   */
+  Md4.hex = function(message) {
+    return new Md4(true).update(message).hex()
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {Array}
+   */
+  Md4.array = function(message) {
+    return new Md4(true).update(message).array()
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {Array}
+   */
+  Md4.digest = function(message) {
+    return new Md4(true).update(message).digest()
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {ArrayBuffer}
+   */
+  Md4.buffer = function(message) {
+    return new Md4(true).update(message).buffer()
+  }
+
+  /**
+   * @param {String|Array|Uint8Array|ArrayBuffer} message
+   * @returns {ArrayBuffer}
+   */
+  Md4.arrayBuffer = function(message) {
+    return new Md4(true).update(message).arrayBuffer()
+  }
+
+  return Md4;
+})(self || window);
