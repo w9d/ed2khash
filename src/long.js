@@ -1,6 +1,7 @@
 /* eslint-disable */
 
-module.exports = Long;
+goog.module('dcodeio.long')
+exports = Long
 
 /**
  * wasm optimizations, removed

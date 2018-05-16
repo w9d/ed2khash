@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* global goog */
-goog.provide('ed2khash')
-import Long from './long.js';
+goog.module('ed2khash')
+/** @const {Long} */ var Long = goog.require('dcodeio.long')
 
 var ed2khash = function () {
   'use strict'
