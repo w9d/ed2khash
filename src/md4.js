@@ -15,23 +15,15 @@ goog.provide('emn178.jsmd4')
 /**
  * @method md4
  * @description MD4 hash function, export to global in browsers.
- * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
- * @returns {String} md4 hashes
- * @example
- * md4(''); // 31d6cfe0d16ae931b73c59d7e0c089c0
- * md4('The quick brown fox jumps over the lazy dog'); // 1bee69a46ba811185c194762abaeae90
- * md4('The quick brown fox jumps over the lazy dog.'); // 2812c6c7136898c51f6f6739ad08750e
- *
- * // It supports byte `Array`, `Uint8Array`, `ArrayBuffer`
- * md4([]); // 31d6cfe0d16ae931b73c59d7e0c089c0
- * md4(new Uint8Array([])); // 31d6cfe0d16ae931b73c59d7e0c089c0
+ * @const
+ * @final
  */
 var md4 = (function (root) {
   'use strict';
 
-  var HEX_CHARS = '0123456789abcdef'.split('');
-  var EXTRA = [128, 32768, 8388608, -2147483648];
-  var SHIFT = [0, 8, 16, 24];
+  /** @const {Array<string>} */ var HEX_CHARS = '0123456789abcdef'.split('');
+  /** @const {Array<number>} */ var EXTRA = [128, 32768, 8388608, -2147483648];
+  /** @const {Array<number>} */ var SHIFT = [0, 8, 16, 24];
 
   var buffer = new ArrayBuffer(68);
   var buffer8 = new Uint8Array(buffer);
@@ -40,7 +32,11 @@ var md4 = (function (root) {
   /**
    * Md4 class
    * @class Md4
+   * @param {boolean} sharedMemory
+   * @struct
    * @constructor
+   * @const
+   * @final
    * @description This is internal class.
    * @see {@link md4.create}
    */
@@ -57,7 +53,7 @@ var md4 = (function (root) {
       this.buffer8 = new Uint8Array(buffer);
       this.blocks = new Uint32Array(buffer);
     }
-    this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = 0;
+    this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = this.lastByteIndex = 0;
     this.finalized = this.hashed = false;
     this.first = true;
   }
@@ -68,7 +64,7 @@ var md4 = (function (root) {
    * @instance
    * @description Update hash
    * @param {String|Array|Uint8Array|ArrayBuffer} message message to hash
-   * @returns {(Md4|undefined)} MD4 object.
+   * @returns {(!Md4|undefined)} MD4 object.
    * @see {@link md4.update}
    */
   Md4.prototype.update = function (message) {
@@ -116,6 +112,9 @@ var md4 = (function (root) {
     return this;
   };
 
+  /**
+   * @returns {undefined}
+   */
   Md4.prototype.finalize = function () {
     if (this.finalized) {
       return;
@@ -137,6 +136,9 @@ var md4 = (function (root) {
     this.hash();
   };
 
+  /**
+   * @returns {undefined}
+   */
   Md4.prototype.hash = function () {
     var a, b, c, d, ab, bc, cd, da, blocks = this.blocks;
 
@@ -341,7 +343,7 @@ var md4 = (function (root) {
    * @memberof Md4
    * @instance
    * @description Output hash as bytes array
-   * @returns {Array} Bytes array
+   * @returns {!Array<number>} Bytes array
    * @see {@link md4.digest}
    * @example
    * hash.digest();
@@ -363,7 +365,7 @@ var md4 = (function (root) {
    * @memberof Md4
    * @instance
    * @description Output hash as bytes array
-   * @returns {Array} Bytes array
+   * @returns {!Array<number>} Bytes array
    * @see {@link md4.array}
    * @example
    * hash.array();
@@ -375,7 +377,7 @@ var md4 = (function (root) {
    * @memberof Md4
    * @instance
    * @description Output hash as ArrayBuffer
-   * @returns {ArrayBuffer} ArrayBuffer
+   * @returns {!ArrayBuffer} ArrayBuffer
    * @see {@link md4.arrayBuffer}
    * @example
    * hash.arrayBuffer();
@@ -398,7 +400,7 @@ var md4 = (function (root) {
    * @memberof Md4
    * @instance
    * @description Output hash as ArrayBuffer
-   * @returns {ArrayBuffer} ArrayBuffer
+   * @returns {!ArrayBuffer} ArrayBuffer
    * @see {@link md4.buffer}
    * @example
    * hash.buffer();
@@ -409,7 +411,7 @@ var md4 = (function (root) {
   // Static functions.
   //
   /**
-   * @returns {Md4}
+   * @returns {!Md4}
    */
   Md4.create = function() {
     return new Md4(false)
@@ -417,7 +419,7 @@ var md4 = (function (root) {
 
   /**
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {(Md4|undefined)}
+   * @returns {(!Md4|undefined)}
    */
   Md4.update = function(message) {
     return Md4.create().update(message)
@@ -425,7 +427,7 @@ var md4 = (function (root) {
 
   /**
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {string}
+   * @returns {!string}
    */
   Md4.hex = function(message) {
     return new Md4(true).update(message).hex()
@@ -433,7 +435,7 @@ var md4 = (function (root) {
 
   /**
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {Array}
+   * @returns {!Array<number>}
    */
   Md4.array = function(message) {
     return new Md4(true).update(message).array()
@@ -441,15 +443,16 @@ var md4 = (function (root) {
 
   /**
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {Array}
+   * @returns {!Array<number>}
    */
   Md4.digest = function(message) {
     return new Md4(true).update(message).digest()
   }
 
   /**
+   * @deprecated This maybe confuse with Buffer in node.js. Please use arrayBuffer instead.
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {ArrayBuffer}
+   * @returns {!ArrayBuffer}
    */
   Md4.buffer = function(message) {
     return new Md4(true).update(message).buffer()
@@ -457,7 +460,7 @@ var md4 = (function (root) {
 
   /**
    * @param {String|Array|Uint8Array|ArrayBuffer} message
-   * @returns {ArrayBuffer}
+   * @returns {!ArrayBuffer}
    */
   Md4.arrayBuffer = function(message) {
     return new Md4(true).update(message).arrayBuffer()

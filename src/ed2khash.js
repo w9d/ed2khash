@@ -289,7 +289,7 @@ var ed2khash = function () {
    */
   function arrayBufferToHexDigest (arr) {
     // taken from js-md4
-    var HEX_CHARS = '0123456789abcdef'.split('')
+    /** @const {Array<string>} */ var HEX_CHARS = '0123456789abcdef'.split('')
     var blocks = new Uint32Array(arr)
     var h0 = blocks[0]
     var h1 = blocks[1]
