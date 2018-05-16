@@ -38,7 +38,6 @@ module.exports = function (grunt) {
           'closure-compiler -O ' + mode,
           '-D goog.DEBUG=' + (debug === 'debug') + ' -W VERBOSE',
           '--extra_annotation_name="exports"',
-          '--process_common_js_modules',
           '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
           '--entry_point=ed2khash --js_output_file ed2khash.min.js',
           '--js="../src/**.js"',
