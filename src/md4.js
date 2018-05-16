@@ -1,5 +1,6 @@
 /* global goog */
-goog.provide('emn178.jsmd4')
+goog.module('emn178.jsmd4')
+exports = Md4
 /* eslint-disable */
 
 /**
@@ -12,14 +13,6 @@ goog.provide('emn178.jsmd4')
  * @license MIT
  */
 /*jslint bitwise: true */
-/**
- * @method md4
- * @description MD4 hash function, export to global in browsers.
- * @const
- * @final
- */
-var md4 = (function (root) {
-  'use strict';
 
   /** @const {Array<string>} */ var HEX_CHARS = '0123456789abcdef'.split('');
   /** @const {Array<number>} */ var EXTRA = [128, 32768, 8388608, -2147483648];
@@ -37,10 +30,9 @@ var md4 = (function (root) {
    * @constructor
    * @const
    * @final
-   * @description This is internal class.
    * @see {@link md4.create}
    */
-  var Md4 = function (sharedMemory) {
+  function Md4 (sharedMemory) {
     if (sharedMemory) {
       blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] =
       blocks[4] = blocks[5] = blocks[6] = blocks[7] =
@@ -465,6 +457,3 @@ var md4 = (function (root) {
   Md4.arrayBuffer = function(message) {
     return new Md4(true).update(message).arrayBuffer()
   }
-
-  return Md4;
-})(self || window);

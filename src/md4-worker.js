@@ -1,8 +1,8 @@
 /* eslint-env browser */
 /* global md4 goog */
 
-goog.provide('ed2khash.worker')
-goog.require('emn178.jsmd4')
+goog.module('ed2khash.worker')
+var md4 = goog.require('emn178.jsmd4')
 
 /***
  * f = finish status
