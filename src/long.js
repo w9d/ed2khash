@@ -11,7 +11,6 @@ var wasm = null
 /**
  * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
  *  See the from* functions below for more convenient ways of constructing Longs.
- * @exports Long
  * @class A Long class for representing a 64 bit two's-complement integer value.
  * @param {number} low The low (signed) 32 bits of the long
  * @param {number} high The high (signed) 32 bits of the long
