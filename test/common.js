@@ -47,9 +47,29 @@ var GenFile = function (generator, size, options) {
   return file
 }
 
+const node_check = function () {
+  return process && process.versions && process.versions.node
+}
+
+const atob_export = function (a) {
+  if (node_check())
+    return Buffer.from(a, 'base64').to('binary')
+  else
+    return atob(a)
+}
+
+const btoa_export = function (a) {
+  if (node_check())
+    return Buffer.from(a, 'binary').to('base64')
+  else
+    return btoa(a)
+}
+
 module.exports = {
   genZero: genZero,
   genRand: genRand,
   genText: genText,
-  GenFile: GenFile
+  GenFile: GenFile,
+  atob: atob_export,
+  btoa: btoa_export
 }

@@ -7,9 +7,14 @@ module.exports = function (grunt) {
     },
     shell: {
       taperun: {
-        command: ['./node_modules/browserify/bin/cmd.js',
-          './test/ed2khash_test.js|./node_modules/tape-run/bin/run.js',
-          '--wait 60 --static build-rel'].join(' ')
+        command: (name) => ['npx --no-install browserify',
+          './test/' + name + '.js|npx --no-install tape-run',
+          '--wait 60 --port 8092 --static build-rel'].join(' ')
+      },
+      taperundirect: {
+        command: (name) => ['npx --no-install browserify',
+          './build-rel/' + name + '|npx --no-install tape-run',
+          '--wait 60 --port 8092 --static build-rel'].join(' ')
       },
       zuullocal: {
         command: 'zuul --ui tape --local 9000 --no-coverage ../test/ed2khash_test.js',
@@ -62,7 +67,12 @@ module.exports = function (grunt) {
   grunt.registerTask('build-release', ['build-rel'])
 
   grunt.registerTask('test-local', ['build-rel', 'shell:zuullocal'])
-  grunt.registerTask('test-tape', ['build-rel', 'shell:taperun'])
+  grunt.registerTask('test-tape', ['build-rel', 'shell:taperun:ed2khash_test'])
+  grunt.registerTask('test-tape-torrent', [
+    'shell:clean:rel',
+    'shell:closure:SIMPLE:rel:ed2khash.torrent_parse.test:torrent_parse_test:debug:yep',
+    'shell:taperundirect:torrent_parse_test.min.js'
+  ])
 
   grunt.registerTask('default', [])
 }
