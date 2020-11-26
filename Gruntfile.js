@@ -2,9 +2,6 @@
 
 module.exports = function (grunt) {
   grunt.initConfig({
-    jshint: {
-      files: ['Gruntfile.js', 'test/*.js', 'src/*.js']
-    },
     eslint: {
       target: ['Gruntfile.js', 'test/*.js', 'src/*.js']
     },
@@ -23,40 +20,43 @@ module.exports = function (grunt) {
           'rm -rf build-' + dir + '/* build-' + dir + '/.* 2>/dev/null||true',
           'cp src/*.html build-' + dir].join('&&')
       },
-      closure_md4: {
-        command: (mode, dir, debug) => ['cd build-' + dir + '&&',
-          'closure-compiler -O ' + mode,
-          '-D goog.DEBUG=' + (debug === 'debug') + ' -W VERBOSE',
-          '--extra_annotation_name="exports"',
-          '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
-          '--entry_point=ed2khash.worker --js_output_file md4-worker.min.js',
+      closure: {
+        command: (mode, dir, entry, out_prefix, debug, node_globals) => ['cd build-' + dir + '&&',
+          'npx --no-install google-closure-compiler -O ' + mode,
+          '-D goog.DEBUG=' + !!debug + (debug ? ' -W VERBOSE' : ''),
+          (debug === 'debug-types' ? ' --jscomp_warning=reportUnknownTypes' : ''),
+          '--dependency_mode PRUNE',
+          '--entry_point=' + entry + ' --js_output_file ' + out_prefix + '.min.js',
           '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' ')
-      },
-      closure_ed2khash: {
-        command: (mode, dir, debug) => ['cd build-' + dir + '&&',
-          'closure-compiler -O ' + mode,
-          '-D goog.DEBUG=' + (debug === 'debug') + ' -W VERBOSE',
-          '--extra_annotation_name="exports"',
-          '--language_in ECMASCRIPT_2017 --dependency_mode STRICT',
-          '--entry_point=ed2khash --js_output_file ed2khash.min.js',
-          '--js="../src/**.js"',
-          '--js="../node_modules/google-closure-library/**.js"'].join(' ')
+          '--js="../test/**.js"',
+          '--js="../node_modules/google-closure-library/**.js"',
+          (node_globals ? '--externs="../node_modules/google-closure-compiler/contrib/nodejs/globals.js"' : '')
+        ].join(' ')
       }
     }
   })
 
-  grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-eslint')
   grunt.loadNpmTasks('grunt-shell')
 
   grunt.registerTask('hint', ['jshint'])
   grunt.registerTask('standard', ['eslint'])
 
-  grunt.registerTask('build-rel', ['shell:clean:rel',
-    'shell:closure_md4:ADVANCED:rel', 'shell:closure_ed2khash:ADVANCED:rel'])
-  grunt.registerTask('build-test', ['shell:clean:test',
-    'shell:closure_md4:ADVANCED:test', 'shell:closure_ed2khash:ADVANCED:test:debug'])
+  grunt.registerTask('build-rel', [
+    'shell:clean:rel',
+    'shell:closure:ADVANCED:rel:ed2khash.worker:md4-worker',
+    'shell:closure:ADVANCED:rel:ed2khash:ed2khash'
+  ])
+  grunt.registerTask('build-test', [
+    'shell:clean:test',
+    'shell:closure:SIMPLE:test:ed2khash.worker:md4-worker',
+    'shell:closure:SIMPLE:test:ed2khash:ed2khash:debug'
+  ])
+  grunt.registerTask('build-types', [
+    'shell:clean:test',
+    'shell:closure:SIMPLE:test:ed2khash.worker:md4-worker:debug-types',
+    'shell:closure:SIMPLE:test:ed2khash:ed2khash:debug-types'
+  ])
 
   grunt.registerTask('build', ['build-rel'])
   grunt.registerTask('build-release', ['build-rel'])
