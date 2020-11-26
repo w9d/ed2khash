@@ -2,6 +2,7 @@
 /* global goog */
 goog.module('ed2khash')
 /** @const {Long} */ var Long = goog.require('dcodeio.long')
+const Torrent_parse = goog.require('ed2khash.torrent_parse')
 
 var ed2khash = function () {
   'use strict'
@@ -13,7 +14,8 @@ var ed2khash = function () {
     'isbusy': isbusy,
     'execute': execute,
     'terminate': terminate,
-    'setworker': setworker
+    'setworker': setworker,
+    'set_bittorrent_quirk': set_bittorrent_quirk
   }
   var reader = new FileReader()
   var md4_worker = null
@@ -27,10 +29,11 @@ var ed2khash = function () {
   var total_multiplier = 0
   var total_processed = 0
   var multipliers = []
+  let bittorrent_quirk = false
 
   reader.onerror = function (evt) {
     die = true
-    console.error('read error', evt.target)
+    console.error('read error', evt.target.error)
     if (prop['onerror']) {
       setTimeout(prop['onerror'], 1, { message: 'Something wrong with HTML5' +
         ' FileReader. The error is...\n\n' + evt.target.error })
@@ -274,13 +277,89 @@ var ed2khash = function () {
 
   function processNextFile () {
     if (files[++fileoffset]) {
-      ed2k_file(files[fileoffset])
+      if (!bittorrent_quirk) {
+        ed2k_file(files[fileoffset])
+      } else {
+        if (files.length !== 1) {
+          if (prop['onerror'])
+            setTimeout(prop['onerror'], 1, { message: 'selected multiple torrent files' })
+          busy = false
+          return
+        }
+        bittorrent_file(files[fileoffset])
+      }
     } else {
-      console.log('all files complete. took ' + (Date.now() - before) + 'ms')
+      if (goog.DEBUG)
+        console.log('all files complete. took ' + (Date.now() - before) + 'ms')
       if (prop['onallcomplete'])
         setTimeout(prop['onallcomplete'], 1)
       busy = false
     }
+  }
+
+  function bittorrent_file (file) {
+    let bin_string = ''
+    busy = true
+    if (file.size > 0x2000000) {
+      if (prop['onerror'])
+        setTimeout(prop['onerror'], 1, { message: 'torrent over arbitrary limit of 32MiB' })
+      busy = false
+      return
+    }
+    reader.onload = evt => {
+      bin_string = ab2str(evt.target.result)
+      let torrent
+      try {
+        torrent = new Torrent_parse(bin_string)
+      } catch (err) {
+        if (prop['onerror'])
+          setTimeout(prop['onerror'], 1, { message: 'torrent_parse says: ' + err })
+        return
+      }
+      let fake_file = {
+        'name': torrent.name(),
+        'size': torrent.size(),
+        'type': 'video/mp4',
+        'lastModified': Date.now()
+      }
+      let fake_hashes = {
+        'ed2k': torrent.info_hash_v1().slice(0, 32),
+        'mpc': 'abcdef0987654321'
+      }
+      if (torrent.info_hash_v1().length !== 40 || fake_hashes['ed2k'].length !== 32 ||
+        !torrent.info_hash_v1().startsWith(fake_hashes['ed2k'])) {
+        if (prop['onerror'])
+          setTimeout(prop['onerror'], 1, { message: 'my dumb sanity checks failed' })
+        return
+      }
+      if (prop['onprogress'])
+        setTimeout(prop['onprogress'], 1, fake_file, 1, 1)
+      if (prop['onfilecomplete'])
+        setTimeout(prop['onfilecomplete'], 2, fake_file, fake_hashes)
+      if (prop['onallcomplete'])
+        setTimeout(prop['onallcomplete'], 3)
+      busy = false
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  /**
+   * @param {!ArrayBuffer} buf
+   * @return {!string}
+   */
+  function ab2str (buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf))
+  }
+
+  /**
+   * Set flag telling ed2khash to process single torrent file and return fake
+   * ed2k hash.
+   * @param {!boolean} flag
+   */
+  function set_bittorrent_quirk (flag) {
+    if (busy)
+      return
+    bittorrent_quirk = flag
   }
 
   /**
