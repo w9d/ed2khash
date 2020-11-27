@@ -314,6 +314,7 @@ var ed2khash = function () {
       } catch (err) {
         if (prop['onerror'])
           setTimeout(prop['onerror'], 1, { message: 'torrent_parse says: ' + err })
+        busy = false
         return
       }
       let fake_file = {
